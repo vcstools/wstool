@@ -1,0 +1,14 @@
+*.orig
+*.swp
+*.pyc
+*.DS_Store
+*~
+*.log
+src/wstool.egg-info/*
+build/*
+dist/*
+.coverage
+*.deb
+*.tgz
+doc-pak
+description-pak

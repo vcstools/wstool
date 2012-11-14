@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+# Software License Agreement (BSD License)
+#
+# Copyright (c) 2010, Willow Garage, Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above
+#    copyright notice, this list of conditions and the following
+#    disclaimer in the documentation and/or other materials provided
+#    with the distribution.
+#  * Neither the name of Willow Garage, Inc. nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# Revision $Id: rosws 14389 2011-07-20 18:38:40Z tfoote $
+# $Author: tfoote $
+
+"""%(prog)s is a command to manipulate ROS workspaces.
+
+Official usage:
+  %(prog)s CMD [ARGS] [OPTIONS]
+
+%(prog)s will try to infer install path from context
+"%(prog)s init" replaces the rosinstall command
+
+Type '%(prog)s --help' for usage.
+"""
+
+from __future__ import print_function
+import sys
+
+try:
+    import wstool.wstool_cli
+    from rosinstall.helpers import ROSInstallException
+    from rosinstall.common import MultiProjectException
+except ImportError as e:
+    sys.stderr.write("ERROR Cannot find rosinstall libraries, check your\
+ installation. One frequent cause is that rosinstall 0.5 is still\
+ installed in /usr/local/lib.\n%s\n" % e)
+    sys.exit(1)
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(wstool.wstool_cli.wstool_main(sys.argv))
+    except ROSInstallException as e:
+        sys.stderr.write("ERROR in wstool: %s" % str(e))
+        sys.exit(1)
+    except MultiProjectException as e:
+        sys.stderr.write("ERROR in config: %s" % str(e))
+        sys.exit(1)
