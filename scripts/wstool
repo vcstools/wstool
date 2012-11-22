@@ -63,8 +63,8 @@ if __name__ == "__main__":
     try:
         sys.exit(wstool.wstool_cli.wstool_main(sys.argv))
     except ROSInstallException as e:
-        sys.stderr.write("ERROR in wstool: %s" % str(e))
+        sys.stderr.write("ERROR in wstool: %s\n" % str(e))
         sys.exit(1)
     except MultiProjectException as e:
-        sys.stderr.write("ERROR in config: %s" % str(e))
+        sys.stderr.write("ERROR in config: %s\n" % str(e))
         sys.exit(1)
