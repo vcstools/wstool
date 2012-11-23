@@ -264,7 +264,7 @@ def wstool_main(argv=None, usage=None):
                 if command == 'help':
                     usage()
                     return 0
-        cli = WstoolCLI(_PROGNAME)
+        cli = WstoolCLI(progname=_PROGNAME)
 
         # commands for which we do not infer target workspace
         commands = {'init': cli.cmd_init}
