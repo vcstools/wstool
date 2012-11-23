@@ -28,6 +28,8 @@ setup(name='wstool',
       download_url="http://pr.willowgarage.com/downloads/wstool/",
       keywords=["ROS"],
       classifiers=["Programming Language :: Python",
+                   "Programming Language :: Python :: 2",
+                   "Programming Language :: Python :: 3",
                    "License :: OSI Approved :: BSD License"],
       description="workspace multi-SCM commands",
       long_description="""\
