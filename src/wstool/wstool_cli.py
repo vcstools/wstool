@@ -236,7 +236,8 @@ def wstool_main(argv=None, usage=None):
             workspace = get_workspace(argv,
                                       os.getcwd(),
                                       config_filename=ROSINSTALL_FILENAME,
-                                      varname=_VARNAME)
+                                      # varname=_VARNAME # breaks wet after dry
+                                      )
             argv.append('info')
         except MultiProjectException as e:
             print(str(e))
