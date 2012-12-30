@@ -64,8 +64,6 @@ from rosinstall.multiproject_cli import MultiprojectCLI, \
 ## specific output has to be generated.
 
 _PROGNAME = 'wstool'
-_VARNAME = 'ROS_WORKSPACE'
-
 
 class WstoolCLI(MultiprojectCLI):
 
@@ -196,7 +194,7 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
             return 0
 
         header = 'workspace: %s\nROS_ROOT: %s' % (target_path,
-                                                get_ros_stack_path(config))
+                                                  get_ros_stack_path(config))
         print(header)
         if not options.no_pkg_path:
             table = get_info_table(config.get_base_path(),
@@ -235,9 +233,7 @@ def wstool_main(argv=None, usage=None):
         try:
             workspace = get_workspace(argv,
                                       os.getcwd(),
-                                      config_filename=ROSINSTALL_FILENAME,
-                                      # varname=_VARNAME # breaks wet after dry
-                                      )
+                                      config_filename=ROSINSTALL_FILENAME)
             argv.append('info')
         except MultiProjectException as e:
             print(str(e))
@@ -300,8 +296,7 @@ def wstool_main(argv=None, usage=None):
             if workspace is None:
                 workspace = get_workspace(args,
                                           os.getcwd(),
-                                          config_filename=ROSINSTALL_FILENAME,
-                                          varname=_VARNAME)
+                                          config_filename=ROSINSTALL_FILENAME)
             return ws_commands[command](workspace, args)
 
     except KeyboardInterrupt:
