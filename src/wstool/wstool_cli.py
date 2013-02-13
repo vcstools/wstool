@@ -240,7 +240,7 @@ def wstool_main(argv=None, usage=None):
             usage()
             return 0
 
-    if '--help' in argv or '-h' in argv:
+    if argv[1] in ['--help', '-h']:
         usage()
         return 0
 
@@ -293,7 +293,7 @@ def wstool_main(argv=None, usage=None):
         if command in commands:
             return commands[command](args)
         else:
-            if workspace is None:
+            if workspace is None and not '--help' in args and not '-h' in args:
                 workspace = get_workspace(args,
                                           os.getcwd(),
                                           config_filename=ROSINSTALL_FILENAME)
