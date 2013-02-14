@@ -74,6 +74,86 @@ class WstoolCLI(MultiprojectCLI):
             config_filename=config_filename,
             config_generator=rosinstall.multiproject_cmd.cmd_persist_config)
 
+
+    def cmd_init(self, argv):
+        if self.config_filename is None:
+            print('Error: Bug: config filename required for init')
+            return 1
+        parser = OptionParser(usage="""usage: %s init [TARGET_PATH [SOURCE_PATH]]?""" % self.progname,
+                              formatter=IndentedHelpFormatterWithNL(),
+                              description=__MULTIPRO_CMD_DICT__["init"] + """
+
+%(prog)s init does the following:
+  1. Reads folder/file/web-uri SOURCE_PATH looking for a rosinstall yaml
+  2. Creates new %(cfg_file)s file at TARGET-PATH
+  3. Generates ROS setup files
+
+SOURCE_PATH can e.g. be a web uri or a rosinstall file with vcs entries only
+If PATH is not given, uses current dir.
+
+Examples:
+$ %(prog)s init ~/fuerte /opt/ros/fuerte
+""" % {'cfg_file': self.config_filename, 'prog': self.progname},
+                              epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
+        parser.add_option("--continue-on-error", dest="robust", default=False,
+                          help="Continue despite checkout errors",
+                          action="store_true")
+        parser.add_option("-j", "--parallel", dest="jobs", default=1,
+                          help="How many parallel threads to use for installing",
+                          action="store")
+        (options, args) = parser.parse_args(argv)
+        if len(args) < 1:
+            target_path = '.'
+        else:
+            target_path = args[0]
+
+        if not os.path.isdir(target_path):
+            if not os.path.exists(target_path):
+                os.mkdir(target_path)
+            else:
+                print('Error: Cannot create in target path %s ' % target_path)
+
+        if os.path.exists(os.path.join(target_path, self.config_filename)):
+            print('Error: There already is a workspace config file %s at "%s". Use %s install/modify.' % (self.config_filename, target_path, self.progname))
+            return 1
+        if len(args) > 2:
+            parser.error('Too many arguments')
+
+        if len(args) == 2:
+            print('Using initial elements from: %s' % args[1])
+            config_uris = [args[1]]
+        else:
+            config_uris = []
+
+        config = multiproject_cmd.get_config(
+            basepath=target_path,
+            additional_uris=config_uris,
+            # catkin workspaces have no resaonable rosinstall chaining semantics
+            # config_filename=self.config_filename
+            )
+        if config_uris and len(config.get_config_elements()) == 0:
+            sys.stderr.write('WARNING: Not using any element from %s\n' % config_uris[0])
+        for element in config.get_config_elements():
+            if not element.is_vcs_element():
+                raise MultiProjectException("wstool does not allow elements without vcs information. %s" % element)
+
+        # includes ROS specific files
+
+        print("Writing %s" % os.path.join(config.get_base_path(), self.config_filename))
+        self.config_generator(config, self.config_filename, get_header(self.progname))
+
+        ## install or update each element
+        install_success = multiproject_cmd.cmd_install_or_update(
+            config,
+            robust=False,
+            num_threads=int(options.jobs))
+
+        if not install_success:
+            print("Warning: installation encountered errors, but --continue-on-error was requested.  Look above for warnings.")
+        print("\nupdate complete.")
+        return 0
+
+
     def cmd_info(self, target_path, argv, reverse=True, config=None):
         only_option_valid_attrs = ['path', 'localname', 'version', 'revision', 'cur_revision', 'uri', 'cur_uri', 'scmtype']
         parser = OptionParser(usage="usage: %s info [localname]* [OPTIONS]" % self.progname,
