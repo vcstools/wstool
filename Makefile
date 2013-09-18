@@ -22,7 +22,7 @@ distro: setup clean_dist
 
 push: distro
 	python setup.py sdist register upload
-	scp dist/wstool-${VERSION}.tar.gz ipr:/var/www/pr.willowgarage.com/html/downloads/wstool
+	scp dist/wstool-${VERSION}.tar.gz ros@ftp-osl.osuosl.org:/home/ros/data/download.ros.org/downloads/wstool
 
 clean: clean_dist
 
