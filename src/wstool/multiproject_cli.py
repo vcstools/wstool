@@ -504,7 +504,7 @@ $ roslocate info robot_model | %(prog)s merge -
                           help="merge by keeping existing entry and discarding new one",
                           action="store_true")
         parser.add_option("-r", "--merge-replace", dest="merge_replace",
-                          default=True,
+                          default=False,
                           help="(default) merge by replacing given entry with new one maintaining ordering",
                           action="store_true")
         parser.add_option("-y", "--confirm-all", dest="confirm_all",
