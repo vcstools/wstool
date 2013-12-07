@@ -408,15 +408,14 @@ class MultiprojectCLI:
 %(prog)s init does the following:
   1. Reads folder/file/web-uri SOURCE_PATH looking for a rosinstall yaml
   2. Creates new %(cfg_file)s file at TARGET-PATH
-  3. Generates ROS setup files
 
-SOURCE_PATH can e.g. be a folder like /opt/ros/electric
+SOURCE_PATH can e.g. be a web uri or a rosinstall file with vcs entries only
 If PATH is not given, uses current dir.
 
 Examples:
 $ %(prog)s init ~/fuerte /opt/ros/fuerte
 """ % {'cfg_file': self.config_filename, 'prog': self.progname},
-            epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
+                              epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
         parser.add_option("--continue-on-error", dest="robust", default=False,
                           help="Continue despite checkout errors",
                           action="store_true")
@@ -441,6 +440,7 @@ $ %(prog)s init ~/fuerte /opt/ros/fuerte
             return 1
         if len(args) > 2:
             parser.error('Too many arguments')
+
         if len(args) == 2:
             print('Using initial elements from: %s' % args[1])
             config_uris = [args[1]]
@@ -450,15 +450,19 @@ $ %(prog)s init ~/fuerte /opt/ros/fuerte
         config = multiproject_cmd.get_config(
             basepath=target_path,
             additional_uris=config_uris,
-            config_filename=(self.config_filename
-                             if self.allow_other_element
-                             else None))
+            # catkin workspaces have no resaonable wstool chaining semantics
+            # config_filename=self.config_filename
+            )
+        if config_uris and len(config.get_config_elements()) == 0:
+            sys.stderr.write('WARNING: Not using any element from %s\n' % config_uris[0])
+        for element in config.get_config_elements():
+            if not element.is_vcs_element():
+                raise MultiProjectException("wstool does not allow elements without vcs information. %s" % element)
 
         # includes ROS specific files
 
         print("Writing %s" % os.path.join(config.get_base_path(), self.config_filename))
-        self.config_generator(
-            config, self.config_filename, get_header(self.progname))
+        self.config_generator(config, self.config_filename, get_header(self.progname))
 
         ## install or update each element
         install_success = multiproject_cmd.cmd_install_or_update(
@@ -834,8 +838,6 @@ $ %(progname)s set robot_model --version-new robot_model-1.7.1
                 os.path.join(newconfig.get_base_path(), self.config_filename),
                 "%s.bak" % os.path.join(newconfig.get_base_path(), self.config_filename))
             self.config_generator(newconfig, self.config_filename)
-            if path_changed:
-                print("\nDo not forget to do ...\n$ source %s/setup.sh\n... in every open terminal." % target_path)
             if (spec.get_scmtype() is not None):
                 print("Config changed, remember to run '%s update %s' to update the folder from %s" %
                       (self.progname, spec.get_local_name(), spec.get_scmtype()))
