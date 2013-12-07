@@ -76,7 +76,7 @@ def modify_svn_repo(clone_path):
     subprocess.check_call(["svn", "add", "--no-auto-props", "added.txt"], cwd=clone_path)
 
 
-class RosinstallDiffSvnTest(AbstractSCMTest):
+class WstoolDiffSvnTest(AbstractSCMTest):
 
     @classmethod
     def setUpClass(self):
@@ -91,7 +91,7 @@ class RosinstallDiffSvnTest(AbstractSCMTest):
         # wstool the remote repo and fake ros
         _add_to_file(os.path.join(self.local_path, ".rosinstall"), "- other: {local-name: ../ros}\n- svn: {local-name: clone, uri: '" + svn_uri + "'}")
 
-        cmd = ["rosinstall", "ws", "-n"]
+        cmd = ["wstool", "update", "-t", "ws"]
         os.chdir(self.test_root_path)
         wstool_main(cmd)
         clone_path = os.path.join(self.local_path, "clone")
@@ -116,15 +116,8 @@ Index: clone/modified.txt
         for snippet in expected:
             self.assertTrue(snippet in output, output)
 
-    def test_Rosinstall_diff_svn_outside(self):
+    def test_wstool_diff_svn_outside(self):
         """Test diff output for svn when run outside workspace"""
-        cmd = ["rosinstall", "ws", "--diff"]
-        os.chdir(self.test_root_path)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = sys.__stdout__
-        output = output.getvalue()
-        self.check_diff_output(output)
 
         cmd = ["wstool", "diff", "-t", "ws"]
         os.chdir(self.test_root_path)
@@ -137,15 +130,9 @@ Index: clone/modified.txt
         cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_diff(os.path.join(self.test_root_path, 'ws'), []))
 
-    def test_Rosinstall_diff_svn_inside(self):
+    def test_wstool_diff_svn_inside(self):
         """Test diff output for svn when run inside workspace"""
         directory = self.test_root_path + "/ws"
-        cmd = ["rosinstall", ".", "--diff"]
-        os.chdir(directory)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        output = output.getvalue()
-        self.check_diff_output(output)
 
         cmd = ["wstool", "diff"]
         os.chdir(directory)
@@ -158,15 +145,9 @@ Index: clone/modified.txt
         cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_status(directory, []))
 
-    def test_Rosinstall_status_svn_inside(self):
+    def test_wstool_status_svn_inside(self):
         """Test status output for svn when run inside workspace"""
         directory = self.test_root_path + "/ws"
-        cmd = ["rosinstall", ".", "--status"]
-        os.chdir(directory)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        output = output.getvalue()
-        self.assertStatusListEqual('A       clone/added.txt\nD       clone/deleted.txt\n!       clone/deleted-fs.txt\nM       clone/modified.txt\n', output)
 
         cmd = ["wstool", "status"]
         os.chdir(directory)
@@ -180,18 +161,8 @@ Index: clone/modified.txt
         cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_diff(directory, []))
 
-    def test_Rosinstall_status_svn_outside(self):
+    def test_wstool_status_svn_outside(self):
         """Test status output for svn when run outside workspace"""
-        cmd = ["rosinstall", "ws", "--status"]
-        cmd = ["rosinstall", "ws", "--status"]
-        os.chdir(self.test_root_path)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = sys.__stdout__
-        output = output.getvalue()
-        self.assertStatusListEqual('A       clone/added.txt\nD       clone/deleted.txt\n!       clone/deleted-fs.txt\nM       clone/modified.txt\n', output)
 
         cmd = ["wstool", "status", "-t", "ws"]
         os.chdir(self.test_root_path)
@@ -204,16 +175,9 @@ Index: clone/modified.txt
         cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_status(os.path.join(self.test_root_path, 'ws'), []))
 
-    def test_Rosinstall_status_svn_untracked(self):
+    def test_wstool_status_svn_untracked(self):
         """Test status output for svn when run outside workspace"""
-        cmd = ["rosinstall", "ws", "--status-untracked"]
-        os.chdir(self.test_root_path)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = sys.__stdout__
-        output = output.getvalue()
-        self.assertStatusListEqual('?       clone/added-fs.txt\nA       clone/added.txt\nD       clone/deleted.txt\n!       clone/deleted-fs.txt\nM       clone/modified.txt\n', output)
-
+        
         cmd = ["wstool", "status", "-t", "ws", "--untracked"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
@@ -238,7 +202,7 @@ Index: clone/modified.txt
         self.assertEqual(0, cli.cmd_info(os.path.join(self.test_root_path, 'ws'), []))
 
 
-class RosinstallInfoSvnTest(AbstractSCMTest):
+class WstoolInfoSvnTest(AbstractSCMTest):
 
     def setUp(self):
         AbstractSCMTest.setUp(self)

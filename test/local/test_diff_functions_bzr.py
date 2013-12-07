@@ -74,7 +74,7 @@ def modify_bzr_repo(clone_path):
     subprocess.check_call(["bzr", "add", "added.txt"], cwd=clone_path)
 
 
-class RosinstallDiffBzrTest(AbstractSCMTest):
+class WstoolDiffBzrTest(AbstractSCMTest):
 
     @classmethod
     def setUpClass(self):
@@ -87,8 +87,7 @@ class RosinstallDiffBzrTest(AbstractSCMTest):
         # wstool the remote repo and fake ros
         _add_to_file(os.path.join(self.local_path, ".rosinstall"),
                      "- other: {local-name: ../ros}\n- bzr: {local-name: clone, uri: %s}" % remote_path)
-
-        cmd = ["wstool", "ws"]
+        cmd = ["wstool", "update", "-t", "ws"]
         os.chdir(self.test_root_path)
         wstool_main(cmd)
 
@@ -107,16 +106,8 @@ class RosinstallDiffBzrTest(AbstractSCMTest):
         self.assertTrue(0 < output.find("=== removed file 'deleted-fs.txt'\n=== removed file 'deleted.txt'\n=== modified file 'modified-fs.txt'\n--- clone/modified-fs.txt"), msg=3)
         self.assertTrue(0 < output.find("@@ -0,0 +1,1 @@\n+foo\n\n=== modified file 'modified.txt'\n--- clone/modified.txt"), msg=4)
 
-    def test_Rosinstall_diff_bzr_outside(self):
+    def test_wstool_diff_bzr_outside(self):
         """Test diff output for bzr when run outside workspace"""
-        cmd = ["wstool", "ws", "--diff"]
-        os.chdir(self.test_root_path)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = sys.__stdout__
-        output = output.getvalue()
-        self.check_diff_output(output)
-
         cmd = ["wstool", "diff", "-t", "ws"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
@@ -129,15 +120,9 @@ class RosinstallDiffBzrTest(AbstractSCMTest):
         self.assertEqual(0, cli.cmd_diff(os.path.join(self.test_root_path, 'ws'), []))
 
 
-    def test_Rosinstall_diff_bzr_inside(self):
+    def test_wstool_diff_bzr_inside(self):
         """Test diff output for bzr when run inside workspace"""
         directory = self.test_root_path + "/ws"
-        cmd = ["rosinstall", ".", "--diff"]
-        os.chdir(directory)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        output = output.getvalue()
-        self.check_diff_output(output)
 
         cmd = ["wstool", "diff"]
         os.chdir(directory)
@@ -150,15 +135,9 @@ class RosinstallDiffBzrTest(AbstractSCMTest):
         cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_diff(directory, []))
 
-    def test_Rosinstall_status_bzr_inside(self):
+    def test_wstool_status_bzr_inside(self):
         """Test status output for bzr when run inside workspace"""
         directory = self.test_root_path + "/ws"
-        cmd = ["rosinstall", ".", "--status"]
-        os.chdir(directory)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        output = output.getvalue()
-        self.assertEqual('+N      clone/added.txt\n D      clone/deleted-fs.txt\n-D      clone/deleted.txt\n M      clone/modified-fs.txt\n M      clone/modified.txt\n', output)
 
         cmd = ["wstool", "status"]
         os.chdir(directory)
@@ -171,17 +150,8 @@ class RosinstallDiffBzrTest(AbstractSCMTest):
         cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_status(directory, []))
 
-    def test_Rosinstall_status_bzr_outside(self):
+    def test_wstool_status_bzr_outside(self):
         """Test status output for bzr when run outside workspace"""
-        cmd = ["rosinstall", "ws", "--status"]
-        os.chdir(self.test_root_path)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = sys.__stdout__
-        output = output.getvalue()
-        self.assertEqual('+N      clone/added.txt\n D      clone/deleted-fs.txt\n-D      clone/deleted.txt\n M      clone/modified-fs.txt\n M      clone/modified.txt\n', output)
 
         cmd = ["wstool", "status", "-t", "ws"]
         os.chdir(self.test_root_path)
@@ -194,15 +164,8 @@ class RosinstallDiffBzrTest(AbstractSCMTest):
         cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_status(os.path.join(self.test_root_path, 'ws'), []))
 
-    def test_Rosinstall_status_bzr_untracked(self):
+    def test_wstool_status_bzr_untracked(self):
         """Test status output for bzr when run outside workspace"""
-        cmd = ["rosinstall", "ws", "--status-untracked"]
-        os.chdir(self.test_root_path)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = sys.__stdout__
-        output = output.getvalue()
-        self.assertEqual('?       clone/added-fs.txt\n+N      clone/added.txt\n D      clone/deleted-fs.txt\n-D      clone/deleted.txt\n M      clone/modified-fs.txt\n M      clone/modified.txt\n', output)
 
         cmd = ["wstool", "status", "-t", "ws", "--untracked"]
         os.chdir(self.test_root_path)
@@ -228,7 +191,7 @@ class RosinstallDiffBzrTest(AbstractSCMTest):
         self.assertEqual(0, cli.cmd_info(os.path.join(self.test_root_path, 'ws'), []))
 
 
-class RosinstallInfoBzrTest(AbstractSCMTest):
+class WstoolInfoBzrTest(AbstractSCMTest):
 
     def setUp(self):
         AbstractSCMTest.setUp(self)

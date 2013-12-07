@@ -66,26 +66,28 @@ class RosinstallOptionsTest(AbstractFakeRosBasedTest):
     def test_Rosinstall_help(self):
         cmd = copy.copy(self.wstool_fn)
         cmd.append("-h")
-        try:
-            wstool_main(cmd)
-            self.fail("expected SystemExit")
-        except SystemExit as e:
-            self.assertEqual(0, e.code)
+        self.assertEqual(0, wstool_main(cmd))
 
     def test_rosinstall_delete_changes(self):
         cmd = copy.copy(self.wstool_fn)
-        cmd.extend([self.directory, self.simple_rosinstall])
-        self.assertTrue(wstool_main(cmd))
+        cmd.extend(["init", self.directory, self.simple_rosinstall])
+        self.assertEqual(0, wstool_main(cmd))
         cmd = copy.copy(self.wstool_fn)
-        cmd.extend([self.directory, self.simple_changed_uri_rosinstall, "--delete-changed-uri"])
-        self.assertTrue(wstool_main(cmd))
+        cmd.extend(["merge", "-t", self.directory, self.simple_changed_uri_rosinstall, "--merge-replace", "-y"])
+        self.assertEqual(0, wstool_main(cmd))
+        cmd = copy.copy(self.wstool_fn)
+        cmd.extend(["update", "-t", self.directory, "--delete-changed-uri"])
+        self.assertEqual(0, wstool_main(cmd))
 
     def test_rosinstall_abort_changes(self):
         cmd = copy.copy(self.wstool_fn)
-        cmd.extend([self.directory, self.simple_rosinstall])
-        self.assertTrue(wstool_main(cmd))
+        cmd.extend(["init", self.directory, self.simple_rosinstall])
+        self.assertEqual(0, wstool_main(cmd))
         cmd = copy.copy(self.wstool_fn)
-        cmd.extend([self.directory, self.simple_changed_uri_rosinstall, "--abort-changed-uri", "-n"])
+        cmd.extend(["merge", "-t", self.directory, self.simple_changed_uri_rosinstall, "--merge-replace", "-y"])
+        self.assertEqual(0, wstool_main(cmd))
+        cmd = copy.copy(self.wstool_fn)
+        cmd.extend(["update", "-t", self.directory, "--abort-changed-uri"])
         try:
             wstool_main(cmd)
             self.fail("expected exception")
@@ -94,26 +96,32 @@ class RosinstallOptionsTest(AbstractFakeRosBasedTest):
 
     def test_rosinstall_backup_changes(self):
         cmd = copy.copy(self.wstool_fn)
-        cmd.extend([self.directory, self.simple_rosinstall])
-        self.assertTrue(wstool_main(cmd))
+        cmd.extend(["init", self.directory, self.simple_rosinstall])
+        self.assertEqual(0, wstool_main(cmd))
         directory1 = tempfile.mkdtemp()
         self.directories["backup1"] = directory1
         cmd = copy.copy(self.wstool_fn)
-        cmd.extend([self.directory, self.simple_changed_uri_rosinstall, "--backup-changed-uri=%s" % directory1])
-        self.assertTrue(wstool_main(cmd))
+        cmd.extend(["merge", "-t", self.directory, self.simple_changed_uri_rosinstall, "--merge-replace", "-y"])
+        self.assertEqual(0, wstool_main(cmd))
+        cmd = copy.copy(self.wstool_fn)
+        cmd.extend(["update",  "-t", self.directory, "--backup-changed-uri=%s" % directory1])
+        self.assertEqual(0, wstool_main(cmd))
         self.assertEqual(len(os.listdir(directory1)), 1)
 
     def test_rosinstall_change_vcs_type(self):
         cmd = copy.copy(self.wstool_fn)
-        cmd.extend([self.directory, self.simple_rosinstall])
-        self.assertTrue(wstool_main(cmd))
+        cmd.extend(["init", self.directory, self.simple_rosinstall])
+        self.assertEqual(0, wstool_main(cmd))
         cmd = copy.copy(self.wstool_fn)
-        cmd.extend([self.directory, self.simple_changed_vcs_rosinstall, "--delete-changed-uri", "-n"])
-        self.assertTrue(wstool_main(cmd))
+        cmd.extend(["merge", "-t", self.directory, self.simple_changed_vcs_rosinstall, "--merge-replace", "-y"])
+        self.assertEqual(0, wstool_main(cmd))
+        cmd = copy.copy(self.wstool_fn)
+        cmd.extend(["update", "-t", self.directory, "--delete-changed-uri"])
+        self.assertEqual(0, wstool_main(cmd))
 
     def test_rosinstall_invalid_fail(self):
         cmd = copy.copy(self.wstool_fn)
-        cmd.extend([self.directory, self.broken_rosinstall])
+        cmd.extend([self.directory, "init", self.broken_rosinstall])
         try:
             wstool_main(cmd)
             self.fail("expected exception")
@@ -122,5 +130,5 @@ class RosinstallOptionsTest(AbstractFakeRosBasedTest):
 
     def test_rosinstall_invalid_continue(self):
         cmd = copy.copy(self.wstool_fn)
-        cmd.extend([self.directory, self.broken_rosinstall, "--continue-on-error"])
+        cmd.extend(["-t", self.directory, "merge", self.broken_rosinstall, "--continue-on-error"])
         self.assertTrue(wstool_main(cmd))

@@ -50,7 +50,7 @@ from test.local.test_diff_functions_hg import create_hg_repo, modify_hg_repo
 from test.local.test_diff_functions_bzr import create_bzr_repo, modify_bzr_repo
 
 
-class RosinstallDiffMultiTest(AbstractSCMTest):
+class WstoolDiffMultiTest(AbstractSCMTest):
 
     @classmethod
     def setUpClass(self):
@@ -82,7 +82,7 @@ class RosinstallDiffMultiTest(AbstractSCMTest):
 
         _add_to_file(os.path.join(self.local_path, ".rosinstall"), rosinstall_spec)
 
-        cmd = ["rosinstall", "ws", "-n"]
+        cmd = ["rosws", "update", "-t", "ws"]
         os.chdir(self.test_root_path)
         wstool_main(cmd)
 
@@ -111,7 +111,7 @@ class RosinstallDiffMultiTest(AbstractSCMTest):
     def test_multi_diff_rosinstall_outside(self):
         '''Test wstool diff output from outside workspace.
         In particular asserts that there are newlines between diffs, and no overlaps'''
-        cmd = ["rosinstall", "ws", "--diff"]
+        cmd = ["wstool", "diff", "-t", "ws"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
         wstool_main(cmd)
@@ -137,7 +137,7 @@ class RosinstallDiffMultiTest(AbstractSCMTest):
         '''Test wstool diff output from inside workspace.
         In particular asserts that there are newlines between diffs, and no overlaps'''
         directory = self.test_root_path + "/ws"
-        cmd = ["rosinstall", ".", "--diff"]
+        cmd = ["wstool", "diff"]
         os.chdir(directory)
         sys.stdout = output = StringIO()
         wstool_main(cmd)
@@ -163,7 +163,7 @@ class RosinstallDiffMultiTest(AbstractSCMTest):
         """Test wstool status output when run inside workspace.
         In particular asserts that there are newlines between statuses, and no overlaps"""
         directory = self.test_root_path + "/ws"
-        cmd = ["rosinstall", ".", "--status"]
+        cmd = ["wstool", "status"]
         os.chdir(directory)
         sys.stdout = output = StringIO()
         wstool_main(cmd)
@@ -189,7 +189,7 @@ class RosinstallDiffMultiTest(AbstractSCMTest):
     def test_multi_status_rosinstall_outside(self):
         """Test wstool status output when run outside workspace.
         In particular asserts that there are newlines between statuses, and no overlaps"""
-        cmd = ["rosinstall", "ws", "--status"]
+        cmd = ["rosinstall", "status", "-t", "ws"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
         wstool_main(cmd)
@@ -216,7 +216,7 @@ class RosinstallDiffMultiTest(AbstractSCMTest):
     def test_multi_status_untracked(self):
         '''tests status output for --untracked.
         In particular asserts that there are newlines between statuses, and no overlaps'''
-        cmd = ["rosinstall", "ws", "--status-untracked"]
+        cmd = ["wstool", "status", "-t", "ws", "--untracked"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
         wstool_main(cmd)

@@ -70,7 +70,7 @@ def modify_git_repo(clone_path):
     subprocess.check_call(["git", "add", "added.txt"], cwd=clone_path)
 
 
-class RosinstallDiffGitTest(AbstractSCMTest):
+class WstoolDiffGitTest(AbstractSCMTest):
 
     @classmethod
     def setUpClass(self):
@@ -83,7 +83,7 @@ class RosinstallDiffGitTest(AbstractSCMTest):
         # wstool the remote repo and fake ros
         _add_to_file(os.path.join(self.local_path, ".rosinstall"), "- other: {local-name: ../ros}\n- git: {local-name: clone, uri: ../remote}")
 
-        cmd = ["wstool", "init", "ws"]
+        cmd = ["wstool", "update", "-t", "ws"]
         os.chdir(self.test_root_path)
         wstool_main(cmd)
 
@@ -95,15 +95,8 @@ class RosinstallDiffGitTest(AbstractSCMTest):
         # sha ids are always same with git
         self.assertEqual('diff --git clone/added.txt clone/added.txt\nnew file mode 100644\nindex 0000000..8d63207\n--- /dev/null\n+++ clone/added.txt\n@@ -0,0 +1 @@\n+flam\ndiff --git clone/deleted-fs.txt clone/deleted-fs.txt\ndeleted file mode 100644\nindex e69de29..0000000\ndiff --git clone/deleted.txt clone/deleted.txt\ndeleted file mode 100644\nindex e69de29..0000000\ndiff --git clone/modified-fs.txt clone/modified-fs.txt\nindex e69de29..257cc56 100644\n--- clone/modified-fs.txt\n+++ clone/modified-fs.txt\n@@ -0,0 +1 @@\n+foo\ndiff --git clone/modified.txt clone/modified.txt\nindex e69de29..257cc56 100644\n--- clone/modified.txt\n+++ clone/modified.txt\n@@ -0,0 +1 @@\n+foo', output.rstrip())
 
-    def test_Rosinstall_diff_git_outside(self):
+    def test_wstool_diff_git_outside(self):
         """Test diff output for git when run outside workspace"""
-        cmd = ["wstool", "update", "ws", "--diff"]
-        os.chdir(self.test_root_path)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = sys.__stdout__
-        output = output.getvalue()
-        self.check_diff_output(output)
 
         cmd = ["wstool", "diff", "-t", "ws"]
         os.chdir(self.test_root_path)
@@ -116,16 +109,9 @@ class RosinstallDiffGitTest(AbstractSCMTest):
         cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_diff(os.path.join(self.test_root_path, 'ws'), []))
 
-    def test_Rosinstall_diff_git_inside(self):
+    def test_wstool_diff_git_inside(self):
         """Test diff output for git when run inside workspace"""
         directory = self.test_root_path + "/ws"
-        cmd = ["wstool", "diff", "."]
-        os.chdir(directory)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        output = output.getvalue()
-        self.check_diff_output(output)
-
         cmd = ["wstool", "diff"]
         os.chdir(directory)
         sys.stdout = output = StringIO()
@@ -137,16 +123,9 @@ class RosinstallDiffGitTest(AbstractSCMTest):
         cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_diff(directory, []))
 
-    def test_Rosinstall_status_git_inside(self):
+    def test_wstool_status_git_inside(self):
         """Test status output for git when run inside workspace"""
         directory = self.test_root_path + "/ws"
-        cmd = ["wstool", "status", "."]
-        os.chdir(directory)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        output = output.getvalue()
-
-        self.assertEqual('A       clone/added.txt\n D      clone/deleted-fs.txt\nD       clone/deleted.txt\n M      clone/modified-fs.txt\nM       clone/modified.txt\n', output)
 
         cmd = ["wstool", "status"]
         os.chdir(directory)
@@ -159,17 +138,8 @@ class RosinstallDiffGitTest(AbstractSCMTest):
         cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_diff(directory, []))
 
-    def test_Rosinstall_status_git_outside(self):
+    def test_Wstool_status_git_outside(self):
         """Test status output for git when run outside workspace"""
-        cmd = ["wstool", "status", "ws"]
-        os.chdir(self.test_root_path)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = sys.__stdout__
-        output = output.getvalue()
-        self.assertEqual('A       clone/added.txt\n D      clone/deleted-fs.txt\nD       clone/deleted.txt\n M      clone/modified-fs.txt\nM       clone/modified.txt\n', output)
 
         cmd = ["wstool", "status", "-t", "ws"]
         os.chdir(self.test_root_path)
@@ -182,15 +152,8 @@ class RosinstallDiffGitTest(AbstractSCMTest):
         cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_status(os.path.join(self.test_root_path, 'ws'), []))
 
-    def test_Rosinstall_status_git_untracked(self):
+    def test_Wstool_status_git_untracked(self):
         """Test untracked status output for git when run outside workspace"""
-        cmd = ["wstool", "status", "ws", "--untracked"]
-        os.chdir(self.test_root_path)
-        sys.stdout = output = StringIO()
-        wstool_main(cmd)
-        sys.stdout = sys.__stdout__
-        output = output.getvalue()
-        self.assertEqual('A       clone/added.txt\n D      clone/deleted-fs.txt\nD       clone/deleted.txt\n M      clone/modified-fs.txt\nM       clone/modified.txt\n??      clone/added-fs.txt\n', output)
 
         cmd = ["wstool", "status", "-t", "ws", "--untracked"]
         os.chdir(self.test_root_path)
@@ -219,7 +182,7 @@ class RosinstallDiffGitTest(AbstractSCMTest):
         self.assertEqual(0, cli.cmd_info(os.path.join(self.test_root_path, 'ws'), []))
 
 
-class RosinstallInfoGitTest(AbstractSCMTest):
+class WstoolInfoGitTest(AbstractSCMTest):
 
     def setUp(self):
         AbstractSCMTest.setUp(self)
@@ -250,7 +213,7 @@ class RosinstallInfoGitTest(AbstractSCMTest):
         output = output.getvalue()
         sys.stdout = sys.__stdout__
 
-    def test_rosinstall_detailed_localpath_info(self):
+    def test_wstool_detailed_localpath_info(self):
         cmd = ["wstool", "info", "-t", "ws"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
