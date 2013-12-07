@@ -50,7 +50,6 @@ import sys
 
 try:
     import wstool.wstool_cli
-    from wstool.helpers import ROSInstallException
     from wstool.common import MultiProjectException
 except ImportError as exc:
     sys.exit("ERROR: Cannot find required rosinstall library version, \
@@ -61,7 +60,5 @@ is that rosinstall 0.5 is still installed in /usr/local/lib.\n%s" % exc)
 if __name__ == "__main__":
     try:
         sys.exit(wstool.wstool_cli.wstool_main(sys.argv))
-    except ROSInstallException as rie:
-        sys.exit("ERROR in wstool: %s" % str(rie))
     except MultiProjectException as mpe:
         sys.exit("ERROR in config: %s" % str(mpe))

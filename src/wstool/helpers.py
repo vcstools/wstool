@@ -38,10 +38,6 @@ from wstool.config_elements import SetupConfigElement
 
 ROSINSTALL_FILENAME = ".rosinstall"
 
-
-class ROSInstallException(Exception):
-    pass
-
 def get_ros_package_path(config):
     """ Return the simplifed ROS_PACKAGE_PATH """
     code_trees = []
