@@ -43,78 +43,11 @@ from mock import Mock
 
 class FunctionsTest(unittest.TestCase):
 
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_is_ros_in_setupfile(self):
-        try:
-            mock_subprocess = Mock()
-            mock_process = Mock(name='mockprocess')
-            mock_subprocess.Popen.return_value = mock_process
-            mock_process.communicate.return_value = ('/somewhere/mock_ros_root/foo/..', None)
-            mock_os = Mock()
-            mock_path = Mock()
-            mock_os.path = mock_path
-            mock_os.environ = {}
-            mock_path.split = os.path.split
-            mock_path.normpath = os.path.normpath
-            mock_path.isfile.return_value = True
-            wstool.helpers.subprocess = mock_subprocess
-            wstool.helpers.os = mock_os
-            result = wstool.helpers.get_ros_root_from_setupfile("fooroot/foodir/setup.sh")
-            self.assertEqual('/somewhere/mock_ros_root', os.path.normpath(result))
-        finally:
-            wstool.helpers.subprocess = subprocess
-            wstool.helpers.os = os
-
-    def test_is_path_stack(self):
-        self.assertTrue(wstool.helpers.is_path_stack(os.path.join("test", "example_dirs", "ros")))
-        self.assertTrue(wstool.helpers.is_path_stack(os.path.join("test", "example_dirs", "ros_comm")))
-        self.assertFalse(wstool.helpers.is_path_stack(os.path.join("test", "example_dirs", "roscpp")))
-
-    def test_is_path_ros(self):
-        self.assertTrue(wstool.helpers.is_path_ros((os.path.join("test", "example_dirs", "ros"))))
-        self.assertFalse(wstool.helpers.is_path_ros(os.path.join("test", "example_dirs", "ros_comm")))
-        self.assertFalse(wstool.helpers.is_path_ros((os.path.join("test", "example_dirs", "roscpp"))))
-
-    def test_get_ros_stack_path(self):
-        config = Config([PathSpec("foo"),
-                         PathSpec(os.path.join("test", "example_dirs", "ros_comm")),
-                         PathSpec(os.path.join("test", "example_dirs", "roscpp")),
-                         PathSpec("bar")],
-                        ".",
-                        None)
-        self.assertEqual(None, wstool.helpers.get_ros_stack_path(config))
-        config = Config([PathSpec("foo"),
-                         PathSpec(os.path.join("test", "example_dirs", "ros_comm")),
-                         PathSpec(os.path.join("test", "example_dirs", "ros")),
-                         PathSpec(os.path.join("test", "example_dirs", "roscpp")),
-                         PathSpec("bar")],
-                        ".",
-                        None)
-        self.assertEqual(os.path.abspath("test/example_dirs/ros"), wstool.helpers.get_ros_stack_path(config))
-
     def test_get_ros_package_path(self):
-        config = Config([],
-                        "/test/example_dirs",
-                        None)
-        self.assertEqual([], wstool.helpers.get_ros_package_path(config))
-        config = Config([PathSpec("foo")],
-                        "/test/example_dirs",
-                        None)
-        self.assertEqual(['/test/example_dirs/foo'], wstool.helpers.get_ros_package_path(config))
         config = Config([PathSpec("foo"),
-                         PathSpec(os.path.join("test", "example_dirs", "ros_comm")),
-                         PathSpec(os.path.join("test", "example_dirs", "ros")),
-                         PathSpec(os.path.join("test", "example_dirs", "roscpp")),
                          PathSpec("bar")],
                         ".",
                         None)
         self.assertEqual(list(map(os.path.abspath, ['bar',
-                          'test/example_dirs/roscpp',
-                          'test/example_dirs/ros_comm',
                           'foo'])),
                          wstool.helpers.get_ros_package_path(config))
