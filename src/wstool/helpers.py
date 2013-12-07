@@ -46,7 +46,6 @@ def get_ros_package_path(config):
     """ Return the simplifed ROS_PACKAGE_PATH """
     code_trees = []
     for tree_el in reversed(config.get_config_elements()):
-        if not is_path_ros(tree_el.get_path()):
-            if not os.path.isfile(tree_el.get_path()):
-                code_trees.append(tree_el.get_path())
+        if not os.path.isfile(tree_el.get_path()):
+            code_trees.append(tree_el.get_path())
     return code_trees
