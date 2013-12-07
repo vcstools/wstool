@@ -32,8 +32,8 @@
 
 import unittest
 
-import rosinstall.config
-from rosinstall.common import MultiProjectException
+import wstool.config
+from wstool.common import MultiProjectException
 from . import mock_client
 
 
@@ -42,31 +42,31 @@ class ConfigElements_Test(unittest.TestCase):
     def test_simple_config_element_API(self):
         path = "some/path"
         localname = "some/local/name"
-        other1 = rosinstall.config_elements.ConfigElement(path, localname)
+        other1 = wstool.config_elements.ConfigElement(path, localname)
         self.assertEqual(path, other1.get_path())
         self.assertEqual(localname, other1.get_local_name())
         self.assertFalse(other1.is_vcs_element())
-        other1 = rosinstall.config_elements.OtherConfigElement(path, localname)
+        other1 = wstool.config_elements.OtherConfigElement(path, localname)
         self.assertEqual(path, other1.get_path())
         self.assertEqual(localname, other1.get_local_name())
         self.assertEqual({'other': {'local-name': 'some/local/name'}}, other1.get_path_spec().get_legacy_yaml())
         self.assertFalse(other1.is_vcs_element())
-        other1 = rosinstall.config_elements.SetupConfigElement(path, localname)
+        other1 = wstool.config_elements.SetupConfigElement(path, localname)
         self.assertEqual(path, other1.get_path())
         self.assertEqual(localname, other1.get_local_name())
         self.assertEqual({'setup-file': {'local-name': 'some/local/name'}}, other1.get_path_spec().get_legacy_yaml())
         self.assertFalse(other1.is_vcs_element())
-        other1 = rosinstall.config_elements.OtherConfigElement(path, localname, properties=[{}])
+        other1 = wstool.config_elements.OtherConfigElement(path, localname, properties=[{}])
         self.assertEqual(path, other1.get_path())
         self.assertEqual(localname, other1.get_local_name())
         self.assertEqual({'other': {'local-name': 'some/local/name'}}, other1.get_path_spec().get_legacy_yaml())
         self.assertFalse(other1.is_vcs_element())
-        other1 = rosinstall.config_elements.OtherConfigElement(path, localname, properties=['meta'])
+        other1 = wstool.config_elements.OtherConfigElement(path, localname, properties=['meta'])
         self.assertEqual(path, other1.get_path())
         self.assertEqual(localname, other1.get_local_name())
         self.assertEqual({'other': {'local-name': 'some/local/name', 'meta': None}}, other1.get_path_spec().get_legacy_yaml())
         self.assertFalse(other1.is_vcs_element())
-        other1 = rosinstall.config_elements.OtherConfigElement(path, localname, properties=[{'meta': {'repo-name': 'skynetish-ros-pkg'}}])
+        other1 = wstool.config_elements.OtherConfigElement(path, localname, properties=[{'meta': {'repo-name': 'skynetish-ros-pkg'}}])
         self.assertEqual(path, other1.get_path())
         self.assertEqual(localname, other1.get_local_name())
         self.assertEqual({'other': {'local-name': 'some/local/name', 'meta': {'repo-name': 'skynetish-ros-pkg'}}}, other1.get_path_spec().get_legacy_yaml())
@@ -76,17 +76,17 @@ class ConfigElements_Test(unittest.TestCase):
         path = "some/path"
         localname = "some/local/name"
         try:
-            rosinstall.config_elements.AVCSConfigElement("mock", None, None, None)
+            wstool.config_elements.AVCSConfigElement("mock", None, None, None)
             self.fail("Exception expected")
         except MultiProjectException:
             pass
         try:
-            rosinstall.config_elements.AVCSConfigElement("mock", "path", None, None)
+            wstool.config_elements.AVCSConfigElement("mock", "path", None, None)
             self.fail("Exception expected")
         except MultiProjectException:
             pass
         try:
-            rosinstall.config_elements.AVCSConfigElement("mock", None, None, "some/uri")
+            wstool.config_elements.AVCSConfigElement("mock", None, None, "some/uri")
             self.fail("Exception expected")
         except MultiProjectException:
             pass
@@ -94,7 +94,7 @@ class ConfigElements_Test(unittest.TestCase):
         localname = "some/local/name"
         uri = 'some/uri'
         version = 'some.version'
-        vcsc = rosinstall.config_elements.AVCSConfigElement("mock", path, localname, uri, vcsc=mock_client.MockVcsClient())
+        vcsc = wstool.config_elements.AVCSConfigElement("mock", path, localname, uri, vcsc=mock_client.MockVcsClient())
         self.assertEqual(path, vcsc.get_path())
         self.assertEqual(localname, vcsc.get_local_name())
         self.assertEqual(uri, vcsc.uri)
@@ -104,7 +104,7 @@ class ConfigElements_Test(unittest.TestCase):
         self.assertEqual({'mock': {'local-name': 'some/local/name', 'uri': 'some/uri'}}, vcsc.get_path_spec().get_legacy_yaml())
         self.assertEqual({'mock': {'local-name': 'some/local/name', 'uri': 'some/uri', }}, vcsc.get_versioned_path_spec().get_legacy_yaml())
 
-        vcsc = rosinstall.config_elements.AVCSConfigElement("mock", path, localname, uri, None, vcsc=mock_client.MockVcsClient())
+        vcsc = wstool.config_elements.AVCSConfigElement("mock", path, localname, uri, None, vcsc=mock_client.MockVcsClient())
         self.assertEqual(path, vcsc.get_path())
         self.assertEqual(localname, vcsc.get_local_name())
         self.assertEqual(uri, vcsc.uri)
@@ -114,7 +114,7 @@ class ConfigElements_Test(unittest.TestCase):
         self.assertEqual({'mock': {'local-name': 'some/local/name', 'uri': 'some/uri'}}, vcsc.get_path_spec().get_legacy_yaml())
         self.assertEqual({'mock': {'local-name': 'some/local/name', 'uri': 'some/uri', }}, vcsc.get_versioned_path_spec().get_legacy_yaml())
 
-        vcsc = rosinstall.config_elements.AVCSConfigElement("mock", path, localname, uri, version, vcsc=mock_client.MockVcsClient())
+        vcsc = wstool.config_elements.AVCSConfigElement("mock", path, localname, uri, version, vcsc=mock_client.MockVcsClient())
         self.assertEqual(path, vcsc.get_path())
         self.assertEqual(localname, vcsc.get_local_name())
         self.assertEqual(uri, vcsc.uri)
@@ -124,7 +124,7 @@ class ConfigElements_Test(unittest.TestCase):
         self.assertEqual({'mock': {'local-name': 'some/local/name', 'version': 'some.version', 'uri': 'some/uri'}}, vcsc.get_path_spec().get_legacy_yaml())
         self.assertEqual({'mock': {'local-name': 'some/local/name', 'version': 'some.version', 'uri': 'some/uri'}}, vcsc.get_versioned_path_spec().get_legacy_yaml())
 
-        vcsc = rosinstall.config_elements.AVCSConfigElement(
+        vcsc = wstool.config_elements.AVCSConfigElement(
             "mock", path, localname, uri, version,
             vcsc=mock_client.MockVcsClient(),
             properties=[{'meta': {'repo-name': 'skynetish-ros-pkg'}}])
@@ -139,7 +139,7 @@ class ConfigElements_Test(unittest.TestCase):
 
         # this time using 'uri_shortcut' in mock_client.MockVcsClient, get special treatment un url_matches()
         uri2 = 'some/uri2'
-        vcsc = rosinstall.config_elements.AVCSConfigElement(
+        vcsc = wstool.config_elements.AVCSConfigElement(
             "mock", path, localname, uri2, version,
             vcsc=mock_client.MockVcsClient(url='url_shortcut'),
             properties=[{'meta': {'repo-name': 'skynetish-ros-pkg'}}])
@@ -158,14 +158,14 @@ class ConfigElements_Test(unittest.TestCase):
         uri = 'some/uri'
         version = 'some.version'
         mockclient = mock_client.MockVcsClient(url=uri)
-        vcsc = rosinstall.config_elements.AVCSConfigElement("mock", path, localname, uri, None, vcsc=mockclient)
+        vcsc = wstool.config_elements.AVCSConfigElement("mock", path, localname, uri, None, vcsc=mockclient)
         vcsc.install()
         self.assertTrue(mockclient.checkedout)
         self.assertFalse(mockclient.updated)
         # checkout failure
         mockclient = mock_client.MockVcsClient(url=uri, checkout_success=False)
         try:
-            vcsc = rosinstall.config_elements.AVCSConfigElement("mock", path, localname, uri, None, vcsc=mockclient)
+            vcsc = wstool.config_elements.AVCSConfigElement("mock", path, localname, uri, None, vcsc=mockclient)
             vcsc.install()
             self.fail("should have raised Exception")
         except MultiProjectException:

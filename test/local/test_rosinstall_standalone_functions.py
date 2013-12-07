@@ -34,9 +34,9 @@ import os
 import unittest
 import subprocess
 
-import rosinstall.helpers
-from rosinstall.config import Config
-from rosinstall.config_yaml import PathSpec
+import wstool.helpers
+from wstool.config import Config
+from wstool.config_yaml import PathSpec
 
 from mock import Mock
 
@@ -62,23 +62,23 @@ class FunctionsTest(unittest.TestCase):
             mock_path.split = os.path.split
             mock_path.normpath = os.path.normpath
             mock_path.isfile.return_value = True
-            rosinstall.helpers.subprocess = mock_subprocess
-            rosinstall.helpers.os = mock_os
-            result = rosinstall.helpers.get_ros_root_from_setupfile("fooroot/foodir/setup.sh")
+            wstool.helpers.subprocess = mock_subprocess
+            wstool.helpers.os = mock_os
+            result = wstool.helpers.get_ros_root_from_setupfile("fooroot/foodir/setup.sh")
             self.assertEqual('/somewhere/mock_ros_root', os.path.normpath(result))
         finally:
-            rosinstall.helpers.subprocess = subprocess
-            rosinstall.helpers.os = os
+            wstool.helpers.subprocess = subprocess
+            wstool.helpers.os = os
 
     def test_is_path_stack(self):
-        self.assertTrue(rosinstall.helpers.is_path_stack(os.path.join("test", "example_dirs", "ros")))
-        self.assertTrue(rosinstall.helpers.is_path_stack(os.path.join("test", "example_dirs", "ros_comm")))
-        self.assertFalse(rosinstall.helpers.is_path_stack(os.path.join("test", "example_dirs", "roscpp")))
+        self.assertTrue(wstool.helpers.is_path_stack(os.path.join("test", "example_dirs", "ros")))
+        self.assertTrue(wstool.helpers.is_path_stack(os.path.join("test", "example_dirs", "ros_comm")))
+        self.assertFalse(wstool.helpers.is_path_stack(os.path.join("test", "example_dirs", "roscpp")))
 
     def test_is_path_ros(self):
-        self.assertTrue(rosinstall.helpers.is_path_ros((os.path.join("test", "example_dirs", "ros"))))
-        self.assertFalse(rosinstall.helpers.is_path_ros(os.path.join("test", "example_dirs", "ros_comm")))
-        self.assertFalse(rosinstall.helpers.is_path_ros((os.path.join("test", "example_dirs", "roscpp"))))
+        self.assertTrue(wstool.helpers.is_path_ros((os.path.join("test", "example_dirs", "ros"))))
+        self.assertFalse(wstool.helpers.is_path_ros(os.path.join("test", "example_dirs", "ros_comm")))
+        self.assertFalse(wstool.helpers.is_path_ros((os.path.join("test", "example_dirs", "roscpp"))))
 
     def test_get_ros_stack_path(self):
         config = Config([PathSpec("foo"),
@@ -87,7 +87,7 @@ class FunctionsTest(unittest.TestCase):
                          PathSpec("bar")],
                         ".",
                         None)
-        self.assertEqual(None, rosinstall.helpers.get_ros_stack_path(config))
+        self.assertEqual(None, wstool.helpers.get_ros_stack_path(config))
         config = Config([PathSpec("foo"),
                          PathSpec(os.path.join("test", "example_dirs", "ros_comm")),
                          PathSpec(os.path.join("test", "example_dirs", "ros")),
@@ -95,17 +95,17 @@ class FunctionsTest(unittest.TestCase):
                          PathSpec("bar")],
                         ".",
                         None)
-        self.assertEqual(os.path.abspath("test/example_dirs/ros"), rosinstall.helpers.get_ros_stack_path(config))
+        self.assertEqual(os.path.abspath("test/example_dirs/ros"), wstool.helpers.get_ros_stack_path(config))
 
     def test_get_ros_package_path(self):
         config = Config([],
                         "/test/example_dirs",
                         None)
-        self.assertEqual([], rosinstall.helpers.get_ros_package_path(config))
+        self.assertEqual([], wstool.helpers.get_ros_package_path(config))
         config = Config([PathSpec("foo")],
                         "/test/example_dirs",
                         None)
-        self.assertEqual(['/test/example_dirs/foo'], rosinstall.helpers.get_ros_package_path(config))
+        self.assertEqual(['/test/example_dirs/foo'], wstool.helpers.get_ros_package_path(config))
         config = Config([PathSpec("foo"),
                          PathSpec(os.path.join("test", "example_dirs", "ros_comm")),
                          PathSpec(os.path.join("test", "example_dirs", "ros")),
@@ -117,4 +117,4 @@ class FunctionsTest(unittest.TestCase):
                           'test/example_dirs/roscpp',
                           'test/example_dirs/ros_comm',
                           'foo'])),
-                         rosinstall.helpers.get_ros_package_path(config))
+                         wstool.helpers.get_ros_package_path(config))

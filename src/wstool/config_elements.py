@@ -38,9 +38,9 @@ import datetime
 from vcstools.vcs_abstraction import get_vcs_client
 from vcstools.vcs_base import VcsError
 
-from rosinstall.common import samefile, MultiProjectException
-from rosinstall.config_yaml import PathSpec
-from rosinstall.ui import Ui
+from wstool.common import samefile, MultiProjectException
+from wstool.config_yaml import PathSpec
+from wstool.ui import Ui
 
 
 # helper class

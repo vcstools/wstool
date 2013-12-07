@@ -33,7 +33,7 @@
 import os
 import yaml
 from vcstools.common import urlopen_netrc
-from rosinstall.common import MultiProjectException
+from wstool.common import MultiProjectException
 
 __REPOTYPES__ = ['svn', 'bzr', 'hg', 'git', 'tar']
 __ALLTYPES__ = __REPOTYPES__ + ['other', 'setup-file']

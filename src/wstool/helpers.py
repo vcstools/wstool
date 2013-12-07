@@ -34,7 +34,7 @@ import os
 import sys
 import codecs
 import subprocess
-from rosinstall.config_elements import SetupConfigElement
+from wstool.config_elements import SetupConfigElement
 
 ROSINSTALL_FILENAME = ".rosinstall"
 

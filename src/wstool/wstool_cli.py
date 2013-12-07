@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""%(prog)s is a command to manipulate ROS workspaces. %(prog)s replaces its predecessor rosinstall.
+"""%(prog)s is a command to manipulate ROS workspaces. %(prog)s replaces its predecessor wstool.
 
 Official usage:
   %(prog)s CMD [ARGS] [OPTIONS]
@@ -46,13 +46,13 @@ import sys
 
 from optparse import OptionParser
 
-from rosinstall.cli_common import get_info_table, get_workspace
-import rosinstall.multiproject_cmd as multiproject_cmd
-import rosinstall.__version__
+from wstool.cli_common import get_info_table, get_workspace
+import wstool.multiproject_cmd as multiproject_cmd
+import wstool.__version__
 
-from rosinstall.helpers import ROSINSTALL_FILENAME
-from rosinstall.common import MultiProjectException
-from rosinstall.multiproject_cli import MultiprojectCLI, \
+from wstool.helpers import ROSINSTALL_FILENAME
+from wstool.common import MultiProjectException
+from wstool.multiproject_cli import MultiprojectCLI, \
     __MULTIPRO_CMD_DICT__, __MULTIPRO_CMD_ALIASES__, \
     __MULTIPRO_CMD_HELP_LIST__, IndentedHelpFormatterWithNL, \
     list_usage, get_header
@@ -71,7 +71,7 @@ class WstoolCLI(MultiprojectCLI):
             self,
             progname=progname,
             config_filename=config_filename,
-            config_generator=rosinstall.multiproject_cmd.cmd_persist_config)
+            config_generator=wstool.multiproject_cmd.cmd_persist_config)
 
     def cmd_init(self, argv):
         if self.config_filename is None:
@@ -82,17 +82,17 @@ class WstoolCLI(MultiprojectCLI):
                               description=__MULTIPRO_CMD_DICT__["init"] + """
 
 %(prog)s init does the following:
-  1. Reads folder/file/web-uri SOURCE_PATH looking for a rosinstall yaml
+  1. Reads folder/file/web-uri SOURCE_PATH looking for a wstool yaml
   2. Creates new %(cfg_file)s file at TARGET-PATH
   3. Generates ROS setup files
 
-SOURCE_PATH can e.g. be a web uri or a rosinstall file with vcs entries only
+SOURCE_PATH can e.g. be a web uri or a wstool file with vcs entries only
 If PATH is not given, uses current dir.
 
 Examples:
 $ %(prog)s init ~/fuerte /opt/ros/fuerte
 """ % {'cfg_file': self.config_filename, 'prog': self.progname},
-                              epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
+                              epilog="See: http://www.ros.org/wiki/wstool for details\n")
         parser.add_option("--continue-on-error", dest="robust", default=False,
                           help="Continue despite checkout errors",
                           action="store_true")
@@ -126,7 +126,7 @@ $ %(prog)s init ~/fuerte /opt/ros/fuerte
         config = multiproject_cmd.get_config(
             basepath=target_path,
             additional_uris=config_uris,
-            # catkin workspaces have no resaonable rosinstall chaining semantics
+            # catkin workspaces have no resaonable wstool chaining semantics
             # config_filename=self.config_filename
             )
         if config_uris and len(config.get_config_elements()) == 0:
@@ -165,7 +165,7 @@ def wstool_main(argv=None, usage=None):
         sys.argv = [_PROGNAME] + sys.argv[1:]
     if '--version' in argv:
         print("%s: \t%s\n%s" % (_PROGNAME,
-                                rosinstall.__version__.version,
+                                wstool.__version__.version,
                                 multiproject_cmd.cmd_version()))
         sys.exit(0)
 

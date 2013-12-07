@@ -2,9 +2,9 @@ import os
 import copy
 import yaml
 
-import rosinstall
-import rosinstall.helpers
-from rosinstall.rosinstall_cli import rosinstall_main
+import wstool
+import wstool.helpers
+from wstool.wstool_cli import wstool_main
 
 from test.scm_test_base import AbstractFakeRosBasedTest, _create_yaml_file, _create_config_elt_dict, _create_tar_file
 
@@ -28,9 +28,9 @@ class RosinstallTarTest(AbstractFakeRosBasedTest):
                           self.simple_tar_rosinstall)
 
     def test_install(self):
-        cmd = copy.copy(self.rosinstall_fn)
+        cmd = copy.copy(self.wstool_fn)
         cmd.extend([self.directory, self.simple_tar_rosinstall])
-        self.assertTrue(rosinstall_main(cmd))
+        self.assertTrue(wstool_main(cmd))
 
         self.assertTrue(os.path.isdir(os.path.join(self.directory, "temptar")))
         self.assertTrue(os.path.isfile(os.path.join(self.directory, ".rosinstall")))

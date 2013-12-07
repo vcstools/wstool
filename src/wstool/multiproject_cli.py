@@ -39,13 +39,13 @@ import datetime
 import yaml
 from optparse import OptionParser, IndentedHelpFormatter
 
-from rosinstall.cli_common import get_info_list, get_info_table, \
+from wstool.cli_common import get_info_list, get_info_table, \
     get_info_table_raw_csv, ONLY_OPTION_VALID_ATTRS
-from rosinstall.common import samefile, select_element, select_elements, \
+from wstool.common import samefile, select_element, select_elements, \
     MultiProjectException, normalize_uri, string_diff
-from rosinstall.config_yaml import PathSpec, get_path_spec_from_yaml
-import rosinstall.multiproject_cmd as multiproject_cmd
-from rosinstall.ui import Ui
+from wstool.config_yaml import PathSpec, get_path_spec_from_yaml
+import wstool.multiproject_cmd as multiproject_cmd
+from wstool.ui import Ui
 
 # implementation of single CLI commands (extracted for use in several
 # overlapping scripts)

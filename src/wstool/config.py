@@ -32,8 +32,8 @@
 
 
 import os
-from rosinstall.config_elements import AVCSConfigElement, OtherConfigElement, SetupConfigElement
-from rosinstall.common import MultiProjectException, normabspath, realpath_relation, normalize_uri
+from wstool.config_elements import AVCSConfigElement, OtherConfigElement, SetupConfigElement
+from wstool.common import MultiProjectException, normabspath, realpath_relation, normalize_uri
 
 
 class Config:
@@ -191,7 +191,7 @@ class Config:
             elif ((relationship == 'CHILD_OF' and new_config_elt.is_vcs_element())
                   or (relationship == 'PARENT_OF' and loop_elt.is_vcs_element())):
                 # we do not allow any elements to be children of scm elements
-                # to allow for parallel updates and because rosinstall may
+                # to allow for parallel updates and because wstool may
                 # delete scm folders on update, and thus subfolders can be
                 # deleted with their parents
                 raise MultiProjectException(

@@ -30,12 +30,12 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"Support for any command line interface (CLI) for rosinstall"
+"Support for any command line interface (CLI) for wstool"
 
 import os
 import re
 from optparse import OptionParser
-from rosinstall.common import samefile, MultiProjectException, select_elements
+from wstool.common import samefile, MultiProjectException, select_elements
 
 ONLY_OPTION_VALID_ATTRS = ['path', 'localname', 'version',
                            'revision', 'cur_revision', 'uri', 'cur_uri', 'scmtype']

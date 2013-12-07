@@ -34,9 +34,9 @@ import os
 import copy
 import tempfile
 
-import rosinstall
-from rosinstall.rosinstall_cli import rosinstall_main
-from rosinstall.common import MultiProjectException
+import wstool
+from wstool.wstool_cli import wstool_main
+from wstool.common import MultiProjectException
 
 from test.scm_test_base import AbstractFakeRosBasedTest, _create_yaml_file, _create_config_elt_dict, _create_git_repo
 
@@ -64,63 +64,63 @@ class RosinstallOptionsTest(AbstractFakeRosBasedTest):
                           self.broken_rosinstall)
 
     def test_Rosinstall_help(self):
-        cmd = copy.copy(self.rosinstall_fn)
+        cmd = copy.copy(self.wstool_fn)
         cmd.append("-h")
         try:
-            rosinstall_main(cmd)
+            wstool_main(cmd)
             self.fail("expected SystemExit")
         except SystemExit as e:
             self.assertEqual(0, e.code)
 
     def test_rosinstall_delete_changes(self):
-        cmd = copy.copy(self.rosinstall_fn)
+        cmd = copy.copy(self.wstool_fn)
         cmd.extend([self.directory, self.simple_rosinstall])
-        self.assertTrue(rosinstall_main(cmd))
-        cmd = copy.copy(self.rosinstall_fn)
+        self.assertTrue(wstool_main(cmd))
+        cmd = copy.copy(self.wstool_fn)
         cmd.extend([self.directory, self.simple_changed_uri_rosinstall, "--delete-changed-uri"])
-        self.assertTrue(rosinstall_main(cmd))
+        self.assertTrue(wstool_main(cmd))
 
     def test_rosinstall_abort_changes(self):
-        cmd = copy.copy(self.rosinstall_fn)
+        cmd = copy.copy(self.wstool_fn)
         cmd.extend([self.directory, self.simple_rosinstall])
-        self.assertTrue(rosinstall_main(cmd))
-        cmd = copy.copy(self.rosinstall_fn)
+        self.assertTrue(wstool_main(cmd))
+        cmd = copy.copy(self.wstool_fn)
         cmd.extend([self.directory, self.simple_changed_uri_rosinstall, "--abort-changed-uri", "-n"])
         try:
-            rosinstall_main(cmd)
+            wstool_main(cmd)
             self.fail("expected exception")
         except MultiProjectException:
             pass
 
     def test_rosinstall_backup_changes(self):
-        cmd = copy.copy(self.rosinstall_fn)
+        cmd = copy.copy(self.wstool_fn)
         cmd.extend([self.directory, self.simple_rosinstall])
-        self.assertTrue(rosinstall_main(cmd))
+        self.assertTrue(wstool_main(cmd))
         directory1 = tempfile.mkdtemp()
         self.directories["backup1"] = directory1
-        cmd = copy.copy(self.rosinstall_fn)
+        cmd = copy.copy(self.wstool_fn)
         cmd.extend([self.directory, self.simple_changed_uri_rosinstall, "--backup-changed-uri=%s" % directory1])
-        self.assertTrue(rosinstall_main(cmd))
+        self.assertTrue(wstool_main(cmd))
         self.assertEqual(len(os.listdir(directory1)), 1)
 
     def test_rosinstall_change_vcs_type(self):
-        cmd = copy.copy(self.rosinstall_fn)
+        cmd = copy.copy(self.wstool_fn)
         cmd.extend([self.directory, self.simple_rosinstall])
-        self.assertTrue(rosinstall_main(cmd))
-        cmd = copy.copy(self.rosinstall_fn)
+        self.assertTrue(wstool_main(cmd))
+        cmd = copy.copy(self.wstool_fn)
         cmd.extend([self.directory, self.simple_changed_vcs_rosinstall, "--delete-changed-uri", "-n"])
-        self.assertTrue(rosinstall_main(cmd))
+        self.assertTrue(wstool_main(cmd))
 
     def test_rosinstall_invalid_fail(self):
-        cmd = copy.copy(self.rosinstall_fn)
+        cmd = copy.copy(self.wstool_fn)
         cmd.extend([self.directory, self.broken_rosinstall])
         try:
-            rosinstall_main(cmd)
+            wstool_main(cmd)
             self.fail("expected exception")
         except MultiProjectException:
             pass
 
     def test_rosinstall_invalid_continue(self):
-        cmd = copy.copy(self.rosinstall_fn)
+        cmd = copy.copy(self.wstool_fn)
         cmd.extend([self.directory, self.broken_rosinstall, "--continue-on-error"])
-        self.assertTrue(rosinstall_main(cmd))
+        self.assertTrue(wstool_main(cmd))

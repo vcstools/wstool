@@ -72,7 +72,7 @@ class RosinstallDiffMultiTest(AbstractSCMTest):
         create_hg_repo(remote_path_hg)
         create_bzr_repo(remote_path_bzr)
 
-        # rosinstall the remote repo and fake ros (using git twice to check all overlaps)
+        # wstool the remote repo and fake ros (using git twice to check all overlaps)
         rosinstall_spec = """- other: {local-name: ../ros}
 - git: {local-name: clone_git, uri: ../remote_git}
 - svn: {local-name: clone_svn, uri: '%s'}
@@ -84,7 +84,7 @@ class RosinstallDiffMultiTest(AbstractSCMTest):
 
         cmd = ["rosinstall", "ws", "-n"]
         os.chdir(self.test_root_path)
-        rosinstall_main(cmd)
+        wstool_main(cmd)
 
         clone_path_git = os.path.join(self.local_path, "clone_git")
         clone_path_git2 = os.path.join(self.local_path, "clone_git2")
@@ -109,108 +109,108 @@ class RosinstallDiffMultiTest(AbstractSCMTest):
         self.assertTrue("\ndiff --git clone_git2/added.txt" in output, output)
 
     def test_multi_diff_rosinstall_outside(self):
-        '''Test rosinstall diff output from outside workspace.
+        '''Test wstool diff output from outside workspace.
         In particular asserts that there are newlines between diffs, and no overlaps'''
         cmd = ["rosinstall", "ws", "--diff"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.check_diff_output(output)
 
-    def test_multi_diff_rosws_outside(self):
-        '''Test rosws diff output from outside workspace.
+    def test_multi_diff_wstool_outside(self):
+        '''Test wstool diff output from outside workspace.
         In particular asserts that there are newlines between diffs, and no overlaps'''
-        cmd = ["rosws", "diff", "-t", "ws"]
+        cmd = ["wstool", "diff", "-t", "ws"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.check_diff_output(output)
 
-        cli = RoswsCLI()
+        cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_diff(os.path.join(self.test_root_path, 'ws'), []))
 
     def test_multi_diff_rosinstall_inside(self):
-        '''Test rosinstall diff output from inside workspace.
+        '''Test wstool diff output from inside workspace.
         In particular asserts that there are newlines between diffs, and no overlaps'''
         directory = self.test_root_path + "/ws"
         cmd = ["rosinstall", ".", "--diff"]
         os.chdir(directory)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         self.check_diff_output(output)
 
-    def test_multi_diff_rosws_inside(self):
-        '''Test rosws diff output from inside workspace.
+    def test_multi_diff_wstool_inside(self):
+        '''Test wstool diff output from inside workspace.
         In particular asserts that there are newlines between diffs, and no overlaps'''
         directory = self.test_root_path + "/ws"
-        cmd = ["rosws", "diff"]
+        cmd = ["wstool", "diff"]
         os.chdir(directory)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         sys.stdout = sys.__stdout__
         self.check_diff_output(output)
 
-        cli = RoswsCLI()
+        cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_diff(directory, []))
 
     def test_multi_status_rosinstall_inside(self):
-        """Test rosinstall status output when run inside workspace.
+        """Test wstool status output when run inside workspace.
         In particular asserts that there are newlines between statuses, and no overlaps"""
         directory = self.test_root_path + "/ws"
         cmd = ["rosinstall", ".", "--status"]
         os.chdir(directory)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
 
         self.assertStatusListEqual('A       clone_git/added.txt\n D      clone_git/deleted-fs.txt\nD       clone_git/deleted.txt\n M      clone_git/modified-fs.txt\nM       clone_git/modified.txt\nA       clone_svn/added.txt\nD       clone_svn/deleted.txt\n!       clone_svn/deleted-fs.txt\nM       clone_svn/modified.txt\nM       clone_hg/modified-fs.txt\nM       clone_hg/modified.txt\nA       clone_hg/added.txt\nR       clone_hg/deleted.txt\n!       clone_hg/deleted-fs.txt\n+N      clone_bzr/added.txt\n D      clone_bzr/deleted-fs.txt\n-D      clone_bzr/deleted.txt\n M      clone_bzr/modified-fs.txt\n M      clone_bzr/modified.txt\nA       clone_git2/added.txt\n D      clone_git2/deleted-fs.txt\nD       clone_git2/deleted.txt\n M      clone_git2/modified-fs.txt\nM       clone_git2/modified.txt\n', output)
 
-    def test_multi_status_rosws_inside(self):
-        """Test rosws status output when run inside workspace.
+    def test_multi_status_wstool_inside(self):
+        """Test wstool status output when run inside workspace.
         In particular asserts that there are newlines between statuses, and no overlaps"""
         directory = self.test_root_path + "/ws"
-        cmd = ["rosws", "status"]
+        cmd = ["wstool", "status"]
         os.chdir(directory)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         sys.stdout = sys.__stdout__
         self.assertStatusListEqual('A       clone_git/added.txt\n D      clone_git/deleted-fs.txt\nD       clone_git/deleted.txt\n M      clone_git/modified-fs.txt\nM       clone_git/modified.txt\nA       clone_svn/added.txt\nD       clone_svn/deleted.txt\n!       clone_svn/deleted-fs.txt\nM       clone_svn/modified.txt\nM       clone_hg/modified-fs.txt\nM       clone_hg/modified.txt\nA       clone_hg/added.txt\nR       clone_hg/deleted.txt\n!       clone_hg/deleted-fs.txt\n+N      clone_bzr/added.txt\n D      clone_bzr/deleted-fs.txt\n-D      clone_bzr/deleted.txt\n M      clone_bzr/modified-fs.txt\n M      clone_bzr/modified.txt\nA       clone_git2/added.txt\n D      clone_git2/deleted-fs.txt\nD       clone_git2/deleted.txt\n M      clone_git2/modified-fs.txt\nM       clone_git2/modified.txt\n', output)
 
-        cli = RoswsCLI()
+        cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_diff(directory, []))
 
     def test_multi_status_rosinstall_outside(self):
-        """Test rosinstall status output when run outside workspace.
+        """Test wstool status output when run outside workspace.
         In particular asserts that there are newlines between statuses, and no overlaps"""
         cmd = ["rosinstall", "ws", "--status"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.assertStatusListEqual('A       clone_git/added.txt\n D      clone_git/deleted-fs.txt\nD       clone_git/deleted.txt\n M      clone_git/modified-fs.txt\nM       clone_git/modified.txt\nA       clone_svn/added.txt\nD       clone_svn/deleted.txt\n!       clone_svn/deleted-fs.txt\nM       clone_svn/modified.txt\nM       clone_hg/modified-fs.txt\nM       clone_hg/modified.txt\nA       clone_hg/added.txt\nR       clone_hg/deleted.txt\n!       clone_hg/deleted-fs.txt\n+N      clone_bzr/added.txt\n D      clone_bzr/deleted-fs.txt\n-D      clone_bzr/deleted.txt\n M      clone_bzr/modified-fs.txt\n M      clone_bzr/modified.txt\nA       clone_git2/added.txt\n D      clone_git2/deleted-fs.txt\nD       clone_git2/deleted.txt\n M      clone_git2/modified-fs.txt\nM       clone_git2/modified.txt\n', output)
 
-    def test_multi_status_rosws_outside(self):
-        """Test rosws status output when run outside workspace.
+    def test_multi_status_wstool_outside(self):
+        """Test wstool status output when run outside workspace.
         In particular asserts that there are newlines between statuses, and no overlaps"""
-        cmd = ["rosws", "status", "-t", "ws"]
+        cmd = ["wstool", "status", "-t", "ws"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.assertStatusListEqual('A       clone_git/added.txt\n D      clone_git/deleted-fs.txt\nD       clone_git/deleted.txt\n M      clone_git/modified-fs.txt\nM       clone_git/modified.txt\nA       clone_svn/added.txt\nD       clone_svn/deleted.txt\n!       clone_svn/deleted-fs.txt\nM       clone_svn/modified.txt\nM       clone_hg/modified-fs.txt\nM       clone_hg/modified.txt\nA       clone_hg/added.txt\nR       clone_hg/deleted.txt\n!       clone_hg/deleted-fs.txt\n+N      clone_bzr/added.txt\n D      clone_bzr/deleted-fs.txt\n-D      clone_bzr/deleted.txt\n M      clone_bzr/modified-fs.txt\n M      clone_bzr/modified.txt\nA       clone_git2/added.txt\n D      clone_git2/deleted-fs.txt\nD       clone_git2/deleted.txt\n M      clone_git2/modified-fs.txt\nM       clone_git2/modified.txt\n', output)
 
-        cli = RoswsCLI()
+        cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_status(os.path.join(self.test_root_path, 'ws'), []))
 
     def test_multi_status_untracked(self):
@@ -219,18 +219,18 @@ class RosinstallDiffMultiTest(AbstractSCMTest):
         cmd = ["rosinstall", "ws", "--status-untracked"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.assertStatusListEqual('A       clone_git/added.txt\n D      clone_git/deleted-fs.txt\nD       clone_git/deleted.txt\n M      clone_git/modified-fs.txt\nM       clone_git/modified.txt\n??      clone_git/added-fs.txt\n?       clone_svn/added-fs.txt\nA       clone_svn/added.txt\nD       clone_svn/deleted.txt\n!       clone_svn/deleted-fs.txt\nM       clone_svn/modified.txt\nM       clone_hg/modified-fs.txt\nM       clone_hg/modified.txt\nA       clone_hg/added.txt\nR       clone_hg/deleted.txt\n!       clone_hg/deleted-fs.txt\n?       clone_hg/added-fs.txt\n?       clone_bzr/added-fs.txt\n+N      clone_bzr/added.txt\n D      clone_bzr/deleted-fs.txt\n-D      clone_bzr/deleted.txt\n M      clone_bzr/modified-fs.txt\n M      clone_bzr/modified.txt\nA       clone_git2/added.txt\n D      clone_git2/deleted-fs.txt\nD       clone_git2/deleted.txt\n M      clone_git2/modified-fs.txt\nM       clone_git2/modified.txt\n??      clone_git2/added-fs.txt\n', output)
 
-        cmd = ["rosws", "status", "-t", "ws", "--untracked"]
+        cmd = ["wstool", "status", "-t", "ws", "--untracked"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.assertStatusListEqual('A       clone_git/added.txt\n D      clone_git/deleted-fs.txt\nD       clone_git/deleted.txt\n M      clone_git/modified-fs.txt\nM       clone_git/modified.txt\n??      clone_git/added-fs.txt\n?       clone_svn/added-fs.txt\nA       clone_svn/added.txt\nD       clone_svn/deleted.txt\n!       clone_svn/deleted-fs.txt\nM       clone_svn/modified.txt\nM       clone_hg/modified-fs.txt\nM       clone_hg/modified.txt\nA       clone_hg/added.txt\nR       clone_hg/deleted.txt\n!       clone_hg/deleted-fs.txt\n?       clone_hg/added-fs.txt\n?       clone_bzr/added-fs.txt\n+N      clone_bzr/added.txt\n D      clone_bzr/deleted-fs.txt\n-D      clone_bzr/deleted.txt\n M      clone_bzr/modified-fs.txt\n M      clone_bzr/modified.txt\nA       clone_git2/added.txt\n D      clone_git2/deleted-fs.txt\nD       clone_git2/deleted.txt\n M      clone_git2/modified-fs.txt\nM       clone_git2/modified.txt\n??      clone_git2/added-fs.txt\n', output)
 
-        cli = RoswsCLI()
+        cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_status(os.path.join(self.test_root_path, 'ws'), ["--untracked"]))

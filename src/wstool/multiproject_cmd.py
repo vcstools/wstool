@@ -45,10 +45,10 @@ A change to expect is abstraction of user interaction.
 
 import sys
 import os
-from rosinstall.common import MultiProjectException, DistributedWork, \
+from wstool.common import MultiProjectException, DistributedWork, \
     select_elements, normabspath
-from rosinstall.config import Config, realpath_relation
-from rosinstall.config_yaml import aggregate_from_uris, generate_config_yaml, \
+from wstool.config import Config, realpath_relation
+from wstool.config_yaml import aggregate_from_uris, generate_config_yaml, \
     get_path_specs_from_uri, PathSpec
 
 import vcstools

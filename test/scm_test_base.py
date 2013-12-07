@@ -139,7 +139,7 @@ class AbstractRosinstallBaseDirTest(AbstractRosinstallCLITest):
         self.directories = {}
         self.directory = tempfile.mkdtemp()
         self.directories["base"] = self.directory
-        self.rosinstall_fn = ["rosinstall", "-n"]
+        self.wstool_fn = ["wstool"]
 
     def tearDown(self):
         for d in self.directories:
@@ -171,7 +171,7 @@ class AbstractFakeRosBasedTest(AbstractRosinstallBaseDirTest):
         # create a repo in hg
         self.hg_path = os.path.join(self.test_root_path, "hgrepo")
         _create_hg_repo(self.hg_path)
-        # create custom rosinstall files to use as input
+        # create custom wstool files to use as input
         self.simple_rosinstall = os.path.join(self.test_root_path, "simple.rosinstall")
         _create_yaml_file([_create_config_elt_dict("git", "ros", self.ros_path),
                            _create_config_elt_dict("git", "gitrepo", self.git_path)],

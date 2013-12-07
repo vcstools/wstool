@@ -32,15 +32,15 @@
 
 import os
 
-import rosinstall
-import rosinstall.multiproject_cmd
-import rosinstall.ui
+import wstool
+import wstool.multiproject_cmd
+import wstool.ui
 
 
 from test.scm_test_base import AbstractFakeRosBasedTest, _create_yaml_file, _create_config_elt_dict
 
 
-class FakeUi(rosinstall.ui.Ui):
+class FakeUi(wstool.ui.Ui):
     def __init__(self, path='', mode='skip', prompt_result='y'):
         self.path = path
         self.mode = mode
@@ -59,15 +59,15 @@ class RosinstallInteractive(AbstractFakeRosBasedTest):
     """tests with possible User Interaction, using mock to simulate user input"""
 
     def setUp(self):
-        self.old_ui = rosinstall.ui.Ui.get_ui()
-        rosinstall.ui.Ui.set_ui(FakeUi())
+        self.old_ui = wstool.ui.Ui.get_ui()
+        wstool.ui.Ui.set_ui(FakeUi())
 
     def tearDown(self):
-        rosinstall.ui.Ui.set_ui(self.old_ui)
+        wstool.ui.Ui.set_ui(self.old_ui)
 
     def test_twice_with_relpath(self):
-        """runs rosinstall with generated self.simple_rosinstall to create local rosinstall env
-        and creates a directory for a second local rosinstall env"""
+        """runs wstool with generated self.simple_rosinstall to create local wstool env
+        and creates a directory for a second local wstool env"""
         AbstractFakeRosBasedTest.setUp(self)
 
         self.rel_uri_rosinstall = os.path.join(self.test_root_path, "rel_uri.rosinstall")
@@ -75,17 +75,17 @@ class RosinstallInteractive(AbstractFakeRosBasedTest):
                            _create_config_elt_dict("git", "gitrepo", os.path.relpath(self.git_path))],
                           self.rel_uri_rosinstall)
 
-        config = rosinstall.multiproject_cmd.get_config(self.directory, [self.rel_uri_rosinstall, self.ros_path])
-        rosinstall.multiproject_cmd.cmd_install_or_update(config)
+        config = wstool.multiproject_cmd.get_config(self.directory, [self.rel_uri_rosinstall, self.ros_path])
+        wstool.multiproject_cmd.cmd_install_or_update(config)
 
-        config = rosinstall.multiproject_cmd.get_config(self.directory, [self.rel_uri_rosinstall, self.ros_path])
-        rosinstall.multiproject_cmd.cmd_install_or_update(config)
+        config = wstool.multiproject_cmd.get_config(self.directory, [self.rel_uri_rosinstall, self.ros_path])
+        wstool.multiproject_cmd.cmd_install_or_update(config)
 
-        self.rel_uri_rosinstall2 = os.path.join(self.test_root_path, "rel_uri.rosinstall2")
+        self.rel_uri_rosinstall2 = os.path.join(self.test_root_path, "rel_uri.wstool2")
         # switch URIs to confuse config
         _create_yaml_file([_create_config_elt_dict("git", "ros", os.path.relpath(self.git_path)),
                            _create_config_elt_dict("git", "gitrepo", self.ros_path)],
                           self.rel_uri_rosinstall2)
 
-        config = rosinstall.multiproject_cmd.get_config(self.directory, [self.rel_uri_rosinstall, self.ros_path])
-        rosinstall.multiproject_cmd.cmd_install_or_update(config)
+        config = wstool.multiproject_cmd.get_config(self.directory, [self.rel_uri_rosinstall, self.ros_path])
+        wstool.multiproject_cmd.cmd_install_or_update(config)

@@ -33,7 +33,7 @@
 import os
 import unittest
 
-from rosinstall.common import DistributedWork, WorkerThread, normabspath,\
+from wstool.common import DistributedWork, WorkerThread, normabspath,\
     is_web_uri, select_elements, select_element, normalize_uri, realpath_relation,\
     conditional_abspath, string_diff, MultiProjectException
 

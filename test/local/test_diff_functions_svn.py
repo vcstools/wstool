@@ -88,12 +88,12 @@ class RosinstallDiffSvnTest(AbstractSCMTest):
 
         create_svn_repo(self.test_root_path, remote_path, filler_path, svn_uri)
 
-        # rosinstall the remote repo and fake ros
+        # wstool the remote repo and fake ros
         _add_to_file(os.path.join(self.local_path, ".rosinstall"), "- other: {local-name: ../ros}\n- svn: {local-name: clone, uri: '" + svn_uri + "'}")
 
         cmd = ["rosinstall", "ws", "-n"]
         os.chdir(self.test_root_path)
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         clone_path = os.path.join(self.local_path, "clone")
 
         modify_svn_repo(clone_path)
@@ -121,20 +121,20 @@ Index: clone/modified.txt
         cmd = ["rosinstall", "ws", "--diff"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.check_diff_output(output)
 
-        cmd = ["rosws", "diff", "-t", "ws"]
+        cmd = ["wstool", "diff", "-t", "ws"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.check_diff_output(output)
 
-        cli = RoswsCLI()
+        cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_diff(os.path.join(self.test_root_path, 'ws'), []))
 
     def test_Rosinstall_diff_svn_inside(self):
@@ -143,19 +143,19 @@ Index: clone/modified.txt
         cmd = ["rosinstall", ".", "--diff"]
         os.chdir(directory)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         self.check_diff_output(output)
 
-        cmd = ["rosws", "diff"]
+        cmd = ["wstool", "diff"]
         os.chdir(directory)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         sys.stdout = sys.__stdout__
         self.check_diff_output(output)
 
-        cli = RoswsCLI()
+        cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_status(directory, []))
 
     def test_Rosinstall_status_svn_inside(self):
@@ -164,20 +164,20 @@ Index: clone/modified.txt
         cmd = ["rosinstall", ".", "--status"]
         os.chdir(directory)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         self.assertStatusListEqual('A       clone/added.txt\nD       clone/deleted.txt\n!       clone/deleted-fs.txt\nM       clone/modified.txt\n', output)
 
-        cmd = ["rosws", "status"]
+        cmd = ["wstool", "status"]
         os.chdir(directory)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         sys.stdout = sys.__stdout__
 
         self.assertStatusListEqual('A       clone/added.txt\nD       clone/deleted.txt\n!       clone/deleted-fs.txt\nM       clone/modified.txt\n', output)
 
-        cli = RoswsCLI()
+        cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_diff(directory, []))
 
     def test_Rosinstall_status_svn_outside(self):
@@ -186,22 +186,22 @@ Index: clone/modified.txt
         cmd = ["rosinstall", "ws", "--status"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.assertStatusListEqual('A       clone/added.txt\nD       clone/deleted.txt\n!       clone/deleted-fs.txt\nM       clone/modified.txt\n', output)
 
-        cmd = ["rosws", "status", "-t", "ws"]
+        cmd = ["wstool", "status", "-t", "ws"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.assertStatusListEqual('A       clone/added.txt\nD       clone/deleted.txt\n!       clone/deleted-fs.txt\nM       clone/modified.txt\n', output)
 
-        cli = RoswsCLI()
+        cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_status(os.path.join(self.test_root_path, 'ws'), []))
 
     def test_Rosinstall_status_svn_untracked(self):
@@ -209,32 +209,32 @@ Index: clone/modified.txt
         cmd = ["rosinstall", "ws", "--status-untracked"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosinstall_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.assertStatusListEqual('?       clone/added-fs.txt\nA       clone/added.txt\nD       clone/deleted.txt\n!       clone/deleted-fs.txt\nM       clone/modified.txt\n', output)
 
-        cmd = ["rosws", "status", "-t", "ws", "--untracked"]
+        cmd = ["wstool", "status", "-t", "ws", "--untracked"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue()
         self.assertStatusListEqual('?       clone/added-fs.txt\nA       clone/added.txt\nD       clone/deleted.txt\n!       clone/deleted-fs.txt\nM       clone/modified.txt\n', output)
 
-        cli = RoswsCLI()
+        cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_status(os.path.join(self.test_root_path, 'ws'), ["--untracked"]))
 
-    def test_rosws_info_svn(self):
-        cmd = ["rosws", "info", "-t", "ws"]
+    def test_wstool_info_svn(self):
+        cmd = ["wstool", "info", "-t", "ws"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
         self.assertEqual(['clone', 'M', 'svn'], tokens[0:3])
 
-        cli = RoswsCLI()
+        cli = WstoolCLI()
         self.assertEqual(0, cli.cmd_info(os.path.join(self.test_root_path, 'ws'), []))
 
 
@@ -259,21 +259,21 @@ class RosinstallInfoSvnTest(AbstractSCMTest):
         self.version_init = "-r1"
         self.version_end = "-r2"
 
-        # rosinstall the remote repo and fake ros
+        # wstool the remote repo and fake ros
         _add_to_file(os.path.join(self.local_path, ".rosinstall"), "- other: {local-name: ../ros}\n- svn: {local-name: clone, uri: '" + self.svn_uri + "'}")
 
-        cmd = ["rosws", "update"]
+        cmd = ["wstool", "update"]
         os.chdir(self.local_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         sys.stdout = sys.__stdout__
 
     def test_rosinstall_detailed_locapath_info(self):
-        cmd = ["rosws", "info", "-t", "ws"]
+        cmd = ["wstool", "info", "-t", "ws"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
         self.assertEqual(['clone', 'svn', self.version_end, self.svn_uri], tokens)
@@ -284,7 +284,7 @@ class RosinstallInfoSvnTest(AbstractSCMTest):
         subprocess.check_call(["svn", "add", "test3.txt"], cwd=clone_path)
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
         self.assertEqual(['clone', 'M', 'svn', self.version_end, self.svn_uri], tokens)
@@ -293,7 +293,7 @@ class RosinstallInfoSvnTest(AbstractSCMTest):
         _add_to_file(os.path.join(self.local_path, ".rosinstall"), "- other: {local-name: ../ros}\n- svn: {local-name: clone, uri: '" + self.svn_uri + "', version: \"1\"}")
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
         self.assertEqual(['clone', 'MV', 'svn', '1', self.version_end, "(%s)" % self.version_init, self.svn_uri], tokens)
@@ -301,7 +301,7 @@ class RosinstallInfoSvnTest(AbstractSCMTest):
         subprocess.check_call(["rm", "-rf", "clone"], cwd=self.local_path)
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
-        rosws_main(cmd)
+        wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
         self.assertEqual(['clone', 'x', 'svn', '1', self.svn_uri], tokens)

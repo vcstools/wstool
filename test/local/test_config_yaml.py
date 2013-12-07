@@ -35,10 +35,10 @@ import unittest
 import tempfile
 import shutil
 
-import rosinstall.config_yaml
-import rosinstall.config
-from rosinstall.common import MultiProjectException
-from rosinstall.config_yaml import rewrite_included_source, \
+import wstool.config_yaml
+import wstool.config
+from wstool.common import MultiProjectException
+from wstool.config_yaml import rewrite_included_source, \
     get_path_spec_from_yaml, get_yaml_from_uri, get_path_specs_from_uri, \
     PathSpec, aggregate_from_uris
 
@@ -145,9 +145,9 @@ class UriAggregationTest(unittest.TestCase):
 
     def test_aggregate_from_uris(self):
         self.directory = tempfile.mkdtemp()
-        config = rosinstall.config.Config(
+        config = wstool.config.Config(
             [PathSpec('ros', 'svn', 'some/uri')], self.directory)
-        rosinstall.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n")
+        wstool.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n")
         ryaml = aggregate_from_uris(
             [self.directory], config.get_config_filename())
         self.assertEqual(ryaml[0].get_legacy_yaml(),
@@ -167,8 +167,8 @@ class ConfigFile_Test(unittest.TestCase):
 
     def test_generate(self):
         self.directory = tempfile.mkdtemp()
-        config = rosinstall.config.Config([], self.directory)
-        rosinstall.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n")
+        config = wstool.config.Config([], self.directory)
+        wstool.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n")
         filepath = os.path.join(self.directory, 'foo')
         self.assertTrue(os.path.exists(filepath))
         with open(filepath, 'r') as f:
@@ -179,8 +179,8 @@ class ConfigFile_Test(unittest.TestCase):
 
     def test_generate_with_other(self):
         self.directory = tempfile.mkdtemp()
-        config = rosinstall.config.Config([PathSpec('ros')], self.directory)
-        rosinstall.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n")
+        config = wstool.config.Config([PathSpec('ros')], self.directory)
+        wstool.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n")
         filepath = os.path.join(self.directory, 'foo')
         self.assertTrue(os.path.exists(filepath))
         with open(filepath, 'r') as f:
@@ -191,8 +191,8 @@ class ConfigFile_Test(unittest.TestCase):
 
     def test_generate_with_stack(self):
         self.directory = tempfile.mkdtemp()
-        config = rosinstall.config.Config([PathSpec('ros', 'svn', 'some/uri')], self.directory)
-        rosinstall.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n")
+        config = wstool.config.Config([PathSpec('ros', 'svn', 'some/uri')], self.directory)
+        wstool.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n")
         filepath = os.path.join(self.directory, 'foo')
         self.assertTrue(os.path.exists(filepath))
         with open(filepath, 'r') as f:

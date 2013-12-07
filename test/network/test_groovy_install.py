@@ -30,11 +30,11 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import rosinstall
-import rosinstall.helpers
-import rosinstall.config
-from rosinstall.rosinstall_cli import rosinstall_main
-from rosinstall.config_yaml import get_yaml_from_uri, get_path_specs_from_uri
+import wstool
+import wstool.helpers
+import wstool.config
+from wstool.wstool_cli import wstool_main
+from wstool.config_yaml import get_yaml_from_uri, get_path_specs_from_uri
 from test.scm_test_base import AbstractRosinstallBaseDirTest
 from test.network.distro_test_util import ros_found_in_yaml, ros_found_in_path_spec
 
@@ -46,11 +46,11 @@ class RosinstallGroovyTest(AbstractRosinstallBaseDirTest):
         AbstractRosinstallBaseDirTest.setUpClass()
 
     def test_get_path_specs_from_uri_from_url(self):
-        url = "http://packages.ros.org/web/rosinstall/generate/raw/groovy/ros-base"
+        url = "http://packages.ros.org/web/wstool/generate/raw/groovy/ros-base"
         path_specs = get_path_specs_from_uri(url)
         self.assertTrue(ros_found_in_path_spec(path_specs), "No ros element in groovy")
 
     def test_get_yaml_from_uri_from_url(self):
-        url = "http://packages.ros.org/web/rosinstall/generate/raw/groovy/ros-base"
+        url = "http://packages.ros.org/web/wstool/generate/raw/groovy/ros-base"
         yaml_elements = get_yaml_from_uri(url)
         self.assertTrue(ros_found_in_yaml(yaml_elements), "No ros element in %s"%url)

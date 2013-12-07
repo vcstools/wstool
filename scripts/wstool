@@ -50,8 +50,8 @@ import sys
 
 try:
     import wstool.wstool_cli
-    from rosinstall.helpers import ROSInstallException
-    from rosinstall.common import MultiProjectException
+    from wstool.helpers import ROSInstallException
+    from wstool.common import MultiProjectException
 except ImportError as exc:
     sys.exit("ERROR: Cannot find required rosinstall library version, \
 check your installation (also of vcstools) is up-to-date. One frequent cause \
