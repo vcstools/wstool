@@ -19,7 +19,7 @@ setup(name='wstool',
       version=get_version(),
       packages=['wstool'],
       package_dir={'': 'src'},
-      # rosinstall dependency to be removed later when code has moved to this project
+      # rosinstall dependency to be kept in order not to break ros hydro install instructions
       install_requires=['vcstools', 'pyyaml', 'rosinstall'],
       scripts=["scripts/wstool"],
       author="Tully Foote",

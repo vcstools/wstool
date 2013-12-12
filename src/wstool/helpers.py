@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2010, Willow Garage, Inc.
@@ -30,35 +29,19 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
-# Revision $Id: rosws 14389 2011-07-20 18:38:40Z tfoote $
-# $Author: tfoote $
 
-"""%(prog)s is a command to manipulate ROS workspaces.
-
-Official usage:
-  %(prog)s CMD [ARGS] [OPTIONS]
-
-%(prog)s will try to infer install path from context
-"%(prog)s init" replaces the rosinstall command
-
-Type '%(prog)s --help' for usage.
-"""
-
-from __future__ import print_function
+import os
 import sys
+import codecs
+import subprocess
+from wstool.config_elements import SetupConfigElement
 
-try:
-    import wstool.wstool_cli
-    from wstool.common import MultiProjectException
-except ImportError as exc:
-    sys.exit("ERROR: Cannot find required rosinstall library version, \
-check your installation (also of vcstools) is up-to-date. One frequent cause \
-is that rosinstall 0.5 is still installed in /usr/local/lib.\n%s" % exc)
+ROSINSTALL_FILENAME = ".rosinstall"
 
-
-if __name__ == "__main__":
-    try:
-        sys.exit(wstool.wstool_cli.wstool_main(sys.argv))
-    except MultiProjectException as mpe:
-        sys.exit("ERROR in config: %s" % str(mpe))
+def get_ros_package_path(config):
+    """ Return the simplifed ROS_PACKAGE_PATH """
+    code_trees = []
+    for tree_el in reversed(config.get_config_elements()):
+        if not os.path.isfile(tree_el.get_path()):
+            code_trees.append(tree_el.get_path())
+    return code_trees

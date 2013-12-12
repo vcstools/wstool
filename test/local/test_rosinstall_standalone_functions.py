@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2010, Willow Garage, Inc.
+# Copyright (c) 2009, Willow Garage, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,35 +29,25 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
-# Revision $Id: rosws 14389 2011-07-20 18:38:40Z tfoote $
-# $Author: tfoote $
 
-"""%(prog)s is a command to manipulate ROS workspaces.
+import os
+import unittest
+import subprocess
 
-Official usage:
-  %(prog)s CMD [ARGS] [OPTIONS]
+import wstool.helpers
+from wstool.config import Config
+from wstool.config_yaml import PathSpec
 
-%(prog)s will try to infer install path from context
-"%(prog)s init" replaces the rosinstall command
-
-Type '%(prog)s --help' for usage.
-"""
-
-from __future__ import print_function
-import sys
-
-try:
-    import wstool.wstool_cli
-    from wstool.common import MultiProjectException
-except ImportError as exc:
-    sys.exit("ERROR: Cannot find required rosinstall library version, \
-check your installation (also of vcstools) is up-to-date. One frequent cause \
-is that rosinstall 0.5 is still installed in /usr/local/lib.\n%s" % exc)
+from mock import Mock
 
 
-if __name__ == "__main__":
-    try:
-        sys.exit(wstool.wstool_cli.wstool_main(sys.argv))
-    except MultiProjectException as mpe:
-        sys.exit("ERROR in config: %s" % str(mpe))
+class FunctionsTest(unittest.TestCase):
+
+    def test_get_ros_package_path(self):
+        config = Config([PathSpec("foo"),
+                         PathSpec("bar")],
+                        ".",
+                        None)
+        self.assertEqual(list(map(os.path.abspath, ['bar',
+                          'foo'])),
+                         wstool.helpers.get_ros_package_path(config))
