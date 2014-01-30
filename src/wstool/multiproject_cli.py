@@ -882,6 +882,10 @@ $ %(progname)s update robot_model geometry
                           default='',
                           help="backup the local copy of a directory before changing uri to this directory.",
                           action="store")
+        parser.add_option("-m", "--timeout", dest="timeout",
+                          default=None,
+                          help="How long to wait for each repo before failing [seconds]",
+                          action="store", type=float)
         parser.add_option("-j", "--parallel", dest="jobs",
                           default=1,
                           help="How many parallel threads to use for installing",
@@ -919,6 +923,7 @@ $ %(progname)s update robot_model geometry
                 mode=mode,
                 robust=options.robust,
                 num_threads=int(options.jobs),
+                timeout=options.timeout,
                 verbose=options.verbose)
             if install_success or options.robust:
                 return 0
