@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""%(prog)s is a command to manipulate ROS workspaces. %(prog)s replaces its predecessor wstool.
+"""%(prog)s is a command to manipulate ROS workspaces. %(prog)s replaces its predecessor rosws.
 
 Official usage:
   %(prog)s CMD [ARGS] [OPTIONS]
