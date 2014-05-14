@@ -269,6 +269,7 @@ def cmd_install_or_update(
     robust=False,
     localnames=None,
     num_threads=1,
+    timeout=None,
     verbose=False):
     """
     performs many things, generally attempting to make
@@ -328,12 +329,14 @@ def cmd_install_or_update(
                                  backup=self.report.backup,
                                  backup_path=self.report.backup_path,
                                  inplace=self.report.inplace,
+                                 timeout=self.report.timeout,
                                  verbose=self.report.verbose)
             return {}
 
     work = DistributedWork(len(preparation_reports), num_threads, silent=False)
     for report in preparation_reports:
         report.verbose = verbose
+        report.timeout = timeout
         thread = Installer(report)
         work.add_thread(thread)
 

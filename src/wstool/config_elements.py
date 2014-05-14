@@ -59,6 +59,7 @@ class PreparationReport(object):
         self.backup = False      # backup vs delete
         self.backup_path = None  # where to move tree to
         self.inplace = False     # whether to follow symlink or just delete
+        self.timeout = None      # maximum time for each checkout/update
 
 
 ## Each Config element provides actions on a local folder
@@ -101,7 +102,8 @@ class ConfigElement(object):
         preparation_report.skip = True
         return preparation_report
 
-    def install(self, checkout=True, backup=False, backup_path=None, inplace=False, verbose=False):
+    def install(self, checkout=True, backup=False, backup_path=None,
+                inplace=False, verbose=False, timeout=None):
         """
         Attempt to make it so that self.path is the result of checking
         out / updating from remote repo.
@@ -332,6 +334,7 @@ class VCSConfigElement(ConfigElement):
                 backup=True,
                 backup_path=None,
                 inplace=False,
+                timeout=None,
                 verbose=False):
         """
         Runs the equivalent of SCM checkout for new local repos or
@@ -363,6 +366,7 @@ class VCSConfigElement(ConfigElement):
                         self.backup(backup_path)
             if not self._get_vcsc().checkout(self.uri,
                                              self.version,
+                                             timeout=timeout,
                                              verbose=verbose):
                 raise MultiProjectException(
                     "[%s] Checkout of %s version %s into %s failed." % (
@@ -373,7 +377,8 @@ class VCSConfigElement(ConfigElement):
         else:
             print("[%s] Updating %s" %
                   (self.get_local_name(), self.get_path()))
-            if not self._get_vcsc().update(self.version, verbose=verbose):
+            if not self._get_vcsc().update(self.version, verbose=verbose,
+                                           timeout=timeout):
                 raise MultiProjectException(
                     "[%s] Update Failed of %s" % (self.get_local_name(),
                                                   self.get_path()))
