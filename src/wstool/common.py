@@ -164,12 +164,27 @@ def normabspath(localname, path):
     return abs_path
 
 
-def is_path_sep(string):
-    """Return true if string is path separator.
+def _is_parent_path(parent, child):
+    """Return true if child is subdirectory of parent.
 
-    Consider both :obj:`os.sep` and :obj:`os.altsep`.
+    Assumes both paths are absolute and don't contain symlinks.
     """
-    return string == os.sep or (os.altsep and string == os.altsep)
+    parent = os.path.normpath(parent)
+    child = os.path.normpath(child)
+
+    prefix = os.path.commonprefix([parent, child])
+
+    if prefix == parent:
+        # Note: os.path.commonprefix operates on character basis, so
+        # take extra care of situations like '/foo/ba' and '/foo/bar/baz'
+
+        child_suffix = child[len(prefix):]
+        child_suffix = child_suffix.lstrip(os.sep)
+
+        if child == os.path.join(prefix, child_suffix):
+            return True
+
+    return False
 
 
 def realpath_relation(abspath1, abspath2):
@@ -186,13 +201,9 @@ def realpath_relation(abspath1, abspath2):
             return 'SAME_AS'
         return None
     else:
-        commonprefix = os.path.commonprefix([realpath1, realpath2])
-        prefixlen = len(commonprefix)
-        # Note: os.path.commonprefix operates on character basis, so
-        #       take extra care of situations like '/foo/' and '/foobar/'
-        if commonprefix == realpath1 and is_path_sep(realpath2[prefixlen]):
+        if _is_parent_path(realpath1, realpath2):
             return 'PARENT_OF'
-        elif commonprefix == realpath2 and is_path_sep(realpath1[prefixlen]):
+        if _is_parent_path(realpath2, realpath1):
             return 'CHILD_OF'
     return None
 

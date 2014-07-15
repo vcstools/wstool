@@ -143,7 +143,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(None, realpath_relation("/foo", "/bar"))
         self.assertEqual(None, realpath_relation("/foo", "/foo2"))
         self.assertEqual(None, realpath_relation("/foo/bar", "/foo/ba"))
-        self.assertEqual(None, realpath_relation("/foo", "/foobar"))
+        self.assertEqual(None, realpath_relation("/foo/ba", "/foo/bar/baz"))
         self.assertEqual(None, realpath_relation("/foo/bar/baz", "/foo/ba"))
 
     def test_select_element(self):
