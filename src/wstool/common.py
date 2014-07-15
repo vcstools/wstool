@@ -164,6 +164,14 @@ def normabspath(localname, path):
     return abs_path
 
 
+def is_path_sep(string):
+    """Return true if string is path separator.
+
+    Consider both :obj:`os.sep` and :obj:`os.altsep`.
+    """
+    return string == os.sep or (os.altsep and string == os.altsep)
+
+
 def realpath_relation(abspath1, abspath2):
     """
     Computes the relationship abspath1 to abspath2
@@ -182,9 +190,9 @@ def realpath_relation(abspath1, abspath2):
         prefixlen = len(commonprefix)
         # Note: os.path.commonprefix operates on character basis, so
         #       take extra care of situations like '/foo/' and '/foobar/'
-        if commonprefix == realpath1 and realpath2[prefixlen] == os.sep:
+        if commonprefix == realpath1 and is_path_sep(realpath2[prefixlen]):
             return 'PARENT_OF'
-        elif commonprefix == realpath2 and realpath1[prefixlen] == os.sep:
+        elif commonprefix == realpath2 and is_path_sep(realpath1[prefixlen]):
             return 'CHILD_OF'
     return None
 
