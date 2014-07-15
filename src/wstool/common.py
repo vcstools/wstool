@@ -179,9 +179,12 @@ def realpath_relation(abspath1, abspath2):
         return None
     else:
         commonprefix = os.path.commonprefix([realpath1, realpath2])
-        if commonprefix == realpath1:
+        prefixlen = len(commonprefix)
+        # Note: os.path.commonprefix operates on character basis, so
+        #       take extra care of situations like '/foo/' and '/foobar/'
+        if commonprefix == realpath1 and realpath2[prefixlen] == os.sep:
             return 'PARENT_OF'
-        elif commonprefix == realpath2:
+        elif commonprefix == realpath2 and realpath1[prefixlen] == os.sep:
             return 'CHILD_OF'
     return None
 
