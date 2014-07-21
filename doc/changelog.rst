@@ -1,3 +1,8 @@
+0.1.4
+-----
+
+- Fix detection of path conflicts #24 (https://github.com/vcstools/wstool/pull/24).
+
 0.0.3
 -----
 
