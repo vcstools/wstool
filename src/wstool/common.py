@@ -164,6 +164,29 @@ def normabspath(localname, path):
     return abs_path
 
 
+def _is_parent_path(parent, child):
+    """Return true if child is subdirectory of parent.
+
+    Assumes both paths are absolute and don't contain symlinks.
+    """
+    parent = os.path.normpath(parent)
+    child = os.path.normpath(child)
+
+    prefix = os.path.commonprefix([parent, child])
+
+    if prefix == parent:
+        # Note: os.path.commonprefix operates on character basis, so
+        # take extra care of situations like '/foo/ba' and '/foo/bar/baz'
+
+        child_suffix = child[len(prefix):]
+        child_suffix = child_suffix.lstrip(os.sep)
+
+        if child == os.path.join(prefix, child_suffix):
+            return True
+
+    return False
+
+
 def realpath_relation(abspath1, abspath2):
     """
     Computes the relationship abspath1 to abspath2
@@ -178,10 +201,9 @@ def realpath_relation(abspath1, abspath2):
             return 'SAME_AS'
         return None
     else:
-        commonprefix = os.path.commonprefix([realpath1, realpath2])
-        if commonprefix == realpath1:
+        if _is_parent_path(realpath1, realpath2):
             return 'PARENT_OF'
-        elif commonprefix == realpath2:
+        if _is_parent_path(realpath2, realpath1):
             return 'CHILD_OF'
     return None
 
