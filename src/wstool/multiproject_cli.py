@@ -666,7 +666,7 @@ $ roslocate info robot_model | %(prog)s merge -
         :param target_path: where to look for config
         :param config: config to use instead of parsing file anew
         """
-        usage = ("usage: %s set [localname] [SCM-URI]?  [--(%ssvn|hg|git|bzr)] [--version=VERSION]]" %
+        usage = ("usage: %s set [localname] [[SCM-URI] --(%ssvn|hg|git|bzr) [--version=VERSION]?]?" %
                  (self.progname, 'detached|' if self.allow_other_element else ''))
         parser = OptionParser(
             usage=usage,
