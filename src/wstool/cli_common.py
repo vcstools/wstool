@@ -244,22 +244,32 @@ def get_info_table_elements(basepath, entries):
     return outputs
 
 
-def get_info_table(basepath, entries, data_only=False, reverse=False):
+def get_info_table(basepath, entries, data_only=False, reverse=False, unmanaged=False):
     """
     return a refined textual representation of the entries. Provides
     column headers and processes data.
     """
-    headers = {
-        'uri': "URI  (Spec) [http(s)://...]",
-        'scm': "SCM ",
-        'localname': "Localname",
-        'version': "Version-Spec",
-        'matching': "UID  (Spec)",
-        'status': "S"}
+    if unmanaged:
+        headers = {
+            'uri': "URI [http(s)://...]",
+            'scm': "SCM ",
+            'localname': "Localname"}
 
-    # table design
-    selected_headers = ['localname', 'status', 'scm', 'version',
-                        'matching', 'uri']
+        # table design
+        selected_headers = ['localname', 'scm', 'uri']
+    else:
+
+        headers = {
+            'uri': "URI  (Spec) [http(s)://...]",
+            'scm': "SCM ",
+            'localname': "Localname",
+            'version': "Version-Spec",
+            'matching': "UID  (Spec)",
+            'status': "S"}
+
+        # table design
+        selected_headers = ['localname', 'status', 'scm', 'version',
+                            'matching', 'uri']
 
     outputs = get_info_table_elements(
         basepath=basepath,
