@@ -103,8 +103,9 @@ class WstoolDiffSvnTest(AbstractSCMTest):
         expected = ["""\
 Index: clone/added.txt
 ===================================================================
---- clone/added.txt\t(revision 0)\n+++ clone/added.txt\t(revision 0)
-@@ -0,0 +1 @@
+--- clone/added.txt\t(revision 0)
++++ clone/added.txt\t""",
+"""@@ -0,0 +1 @@
 +flam""",
                     """\
 Index: clone/modified.txt
