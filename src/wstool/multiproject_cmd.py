@@ -385,6 +385,9 @@ def cmd_info(config, localnames=None, untracked=False):
     """
 
     class InfoRetriever():
+        """
+        Auxilliary class to perform IO-bound operations in individual threads
+        """
 
         def __init__(self, element, path, untracked):
             self.element = element
@@ -441,11 +444,12 @@ def cmd_info(config, localnames=None, untracked=False):
                     'actualversion': actualversion,
                     'modified': modified,
                     'properties': self.element.get_properties()}
+
     path = config.get_base_path()
     # call SCM info in separate threads
     elements = config.get_config_elements()
-    work = DistributedWork(len(elements))
     elements = select_elements(config, localnames)
+    work = DistributedWork(len(elements))
     for element in elements:
         if element.get_properties() is None or not 'setup-file' in element.get_properties():
             work.add_thread(InfoRetriever(element, path, untracked))
