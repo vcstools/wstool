@@ -394,6 +394,46 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
         self.assertEqual(result[2]['scm'], 'hg')
         self.assertEqual(result[3]['scm'], 'bzr')
 
+    def test_unmanaged(self):
+        root_path = tempfile.mkdtemp()
+        ws_path = os.path.join(root_path, "ws")
+        os.makedirs(ws_path)
+
+        self.mock_config = FakeConfig([], [], ws_path)
+        # empty folder
+        result = wstool.multiproject_cmd.cmd_find_unmanaged_repos(self.mock_config)
+        self.assertEqual(len(result), 0)
+        # subfolders no vcs
+        gitrepo_path = os.path.join(ws_path, "gitrepo")
+        os.makedirs(gitrepo_path)
+        svnrepo_path = os.path.join(ws_path, "svnrepo")
+        os.makedirs(svnrepo_path)
+        bzrrepo_path = os.path.join(ws_path, "bzrrepo")
+        os.makedirs(bzrrepo_path)
+        hgrepo_path = os.path.join(ws_path, "sub/hgrepo")
+        os.makedirs(hgrepo_path)
+        result = wstool.multiproject_cmd.cmd_find_unmanaged_repos(self.mock_config)
+        self.assertEqual(len(result), 0)
+        # vcs folders
+        os.makedirs(os.path.join(gitrepo_path, ".git"))
+        os.makedirs(os.path.join(hgrepo_path, ".hg"))
+        os.makedirs(os.path.join(svnrepo_path, ".svn"))
+        os.makedirs(os.path.join(bzrrepo_path, ".bzr"))
+        result = wstool.multiproject_cmd.cmd_find_unmanaged_repos(self.mock_config)
+        self.assertEqual(len(result), 4)
+        # vcs folders covered
+        mock = MockVcsConfigElement('git',
+                                    gitrepo_path,
+                                    'gitrepo',
+                                    None,
+                                    version='version',
+                                    actualversion='actual',
+                                    specversion='spec')
+        self.mock_config = FakeConfig([mock], [], ws_path)
+        # empty folder
+        result = wstool.multiproject_cmd.cmd_find_unmanaged_repos(self.mock_config)
+        self.assertEqual(len(result), 3)
+
     def test_info_real_path(self):
         root_path = tempfile.mkdtemp()
         el_path = os.path.join(root_path, "ros")
@@ -551,7 +591,14 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
                     'specversion': 'broken',
                     'actualversion': 'version'}]
         self.assertEqual(["localname", "V", "svn", "tags/tagname", "(branches/branchname)", "version", "(broken)", "some.svn.tags.server/some/"], _nth_line_split(-1, wstool.cli_common.get_info_table(basepath, entries)))
-
+        entries = [{'scm': 'scm',
+                    'uri': 'uri',
+                    'curr_uri': 'uri',
+                    'version': 'version',
+                    'localname': 'localname',
+                    'specversion': 'specversion',
+                    'actualversion': 'actualversion'}]
+        self.assertEqual(["localname", "scm", "uri"], _nth_line_split(-1, wstool.cli_common.get_info_table(basepath, entries, unmanaged=True)))
 
     def test_info_list(self):
         basepath = '/foo/path'

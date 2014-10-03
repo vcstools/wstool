@@ -76,6 +76,8 @@ class RosinstallInteractive(AbstractFakeRosBasedTest):
                           self.rel_uri_rosinstall)
 
         config = wstool.multiproject_cmd.get_config(self.directory, [self.rel_uri_rosinstall, self.ros_path])
+        wstool.multiproject_cmd.cmd_info(config)
+        wstool.multiproject_cmd.cmd_find_unmanaged_repos
         wstool.multiproject_cmd.cmd_install_or_update(config)
 
         config = wstool.multiproject_cmd.get_config(self.directory, [self.rel_uri_rosinstall, self.ros_path])
