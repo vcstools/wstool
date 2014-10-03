@@ -313,16 +313,16 @@ class InstallTest(unittest.TestCase):
             shutil.rmtree(test_root)
 
 
-class GetStatusDiffCmdTest(unittest.TestCase):
+class GetStatusDiffInfoCmdTest(unittest.TestCase):
 
     def test_status(self):
         self.mock_config = FakeConfig()
         result = wstool.multiproject_cmd.cmd_status(self.mock_config)
-        self.assertTrue(len(result) == 0)
+        self.assertEqual(len(result), 0)
         self.mock_config = FakeConfig(
             [MockVcsConfigElement('git', 'gitpath', 'gitname', None)])
         result = wstool.multiproject_cmd.cmd_status(self.mock_config)
-        self.assertTrue(len(result) == 1)
+        self.assertEqual(len(result), 1)
         self.assertTrue(result[0]['status'] is not None)
         self.assertTrue(result[0]['entry'] is not None)
         self.mock_config = FakeConfig(
@@ -333,16 +333,16 @@ class GetStatusDiffCmdTest(unittest.TestCase):
              'hg', 'hgpath', 'hgname', None),
              MockVcsConfigElement('bzr', 'bzrpath', 'bzrname', None)])
         result = wstool.multiproject_cmd.cmd_status(self.mock_config)
-        self.assertTrue(len(result) == 4)
-        self.assertTrue(result[0]['status'].count('git') == 1)
-        self.assertTrue(result[1]['status'].count('svn') == 1)
-        self.assertTrue(result[2]['status'].count('hg') == 1)
-        self.assertTrue(result[3]['status'].count('bzr') == 1)
+        self.assertEqual(len(result), 4)
+        self.assertEqual(result[0]['status'].count('git'), 1)
+        self.assertEqual(result[1]['status'].count('svn'), 1)
+        self.assertEqual(result[2]['status'].count('hg'), 1)
+        self.assertEqual(result[3]['status'].count('bzr'), 1)
 
     def test_diff(self):
         self.mock_config = FakeConfig()
         result = wstool.multiproject_cmd.cmd_diff(self.mock_config)
-        self.assertTrue(len(result) == 0)
+        self.assertEqual(len(result), 0)
         self.mock_config = FakeConfig(
             [MockVcsConfigElement('git', 'gitpath', 'gitname', None)])
         result = wstool.multiproject_cmd.cmd_diff(self.mock_config)
@@ -357,19 +357,20 @@ class GetStatusDiffCmdTest(unittest.TestCase):
              'hg', 'hgpath', 'hgname', None),
              MockVcsConfigElement('bzr', 'bzrpath', 'bzrname', None)])
         result = wstool.multiproject_cmd.cmd_diff(self.mock_config)
-        self.assertTrue(len(result) == 4)
-        self.assertTrue(result[0]['diff'].count('git') == 1)
-        self.assertTrue(result[1]['diff'].count('svn') == 1)
-        self.assertTrue(result[2]['diff'].count('hg') == 1)
-        self.assertTrue(result[3]['diff'].count('bzr') == 1)
+        self.assertEqual(len(result), 4)
+        self.assertEqual(result[0]['diff'].count('git'), 1)
+        self.assertEqual(result[1]['diff'].count('svn'), 1)
+        self.assertEqual(result[2]['diff'].count('hg'), 1)
+        self.assertEqual(result[3]['diff'].count('bzr'), 1)
 
     def test_info(self):
-        self.mock_config = FakeConfig([], 'foopath')
+        self.mock_config = FakeConfig([], [], 'foopath')
         result = wstool.multiproject_cmd.cmd_info(self.mock_config)
-        self.assertTrue(len(result) == 0)
+        self.assertEqual(len(result), 0)
         self.mock_config = FakeConfig(
             [MockVcsConfigElement(
                 'git', 'gitpath', 'gitname', None, version='version')],
+            [],
             'foopath')
         result = wstool.multiproject_cmd.cmd_info(self.mock_config)
         self.assertEqual(len(result), 1)
@@ -384,22 +385,23 @@ class GetStatusDiffCmdTest(unittest.TestCase):
              'hg', 'hgpath', 'hgname', None),
              MockVcsConfigElement(
              'bzr', 'bzrpath', 'bzrname', None)],
+            [],
             'foopath')
         result = wstool.multiproject_cmd.cmd_info(self.mock_config)
-        self.assertTrue(len(result) == 4)
-        self.assertTrue(result[0]['scm'] == 'git')
-        self.assertTrue(result[1]['scm'] == 'svn')
-        self.assertTrue(result[2]['scm'] == 'hg')
-        self.assertTrue(result[3]['scm'] == 'bzr')
+        self.assertEqual(len(result), 4)
+        self.assertEqual(result[0]['scm'], 'git')
+        self.assertEqual(result[1]['scm'], 'svn')
+        self.assertEqual(result[2]['scm'], 'hg')
+        self.assertEqual(result[3]['scm'], 'bzr')
 
     def test_info_real_path(self):
         root_path = tempfile.mkdtemp()
         el_path = os.path.join(root_path, "ros")
         os.makedirs(el_path)
         try:
-            self.mock_config = FakeConfig([], 'foopath')
+            self.mock_config = FakeConfig([], [], 'foopath')
             result = wstool.multiproject_cmd.cmd_info(self.mock_config)
-            self.assertTrue(len(result) == 0)
+            self.assertEqual(len(result), 0)
             mock = MockVcsConfigElement('git',
                                         el_path,
                                         'gitname',
@@ -407,7 +409,7 @@ class GetStatusDiffCmdTest(unittest.TestCase):
                                         version='version',
                                         actualversion='actual',
                                         specversion='spec')
-            self.mock_config = FakeConfig([mock], 'foopath')
+            self.mock_config = FakeConfig([mock], [], 'foopath')
             result = wstool.multiproject_cmd.cmd_info(self.mock_config)
             self.assertEqual(len(result), 1)
             self.assertEqual(result[0]['scm'], 'git')
@@ -421,7 +423,7 @@ class GetStatusDiffCmdTest(unittest.TestCase):
                                         version='version',
                                         actualversion='actual',
                                         specversion=None)  # means scm does not know version
-            self.mock_config = FakeConfig([mock], 'foopath')
+            self.mock_config = FakeConfig([mock], [], 'foopath')
             result = wstool.multiproject_cmd.cmd_info(self.mock_config)
             self.assertEqual(len(result), 1)
             self.assertEqual(result[0]['scm'], 'git')
@@ -719,7 +721,7 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
         os.makedirs(el_path)
         try:
             # default test
-            self.mock_config = FakeConfig([], 'foopath')
+            self.mock_config = FakeConfig([], [], 'foopath')
             result = wstool.multiproject_cmd.cmd_snapshot(self.mock_config)
             self.assertEqual(0, len(result))
             mock = MockVcsConfigElement('git',
@@ -729,14 +731,14 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
                                         version='version',
                                         actualversion='actual',
                                         specversion='spec')
-            self.mock_config = FakeConfig([mock], 'foopath')
+            self.mock_config = FakeConfig([mock], [], 'foopath')
             result = wstool.multiproject_cmd.cmd_snapshot(self.mock_config)
             self.assertEqual(1, len(result))
             self.assertEqual('actual', result[0]['git']['version'])
             # test other is discarded
             mock2 = wstool.config_elements.OtherConfigElement(el_path,
                                                                   'othername')
-            self.mock_config = FakeConfig([mock, mock2], 'foopath')
+            self.mock_config = FakeConfig([mock, mock2], [], 'foopath')
             result = wstool.multiproject_cmd.cmd_snapshot(self.mock_config)
             self.assertEqual(1, len(result))
             # test fallbacks on specs if actual version is not known
@@ -747,7 +749,7 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
                                         version='version',
                                         actualversion=None,
                                         specversion='spec')
-            self.mock_config = FakeConfig([mock], 'foopath')
+            self.mock_config = FakeConfig([mock], [], 'foopath')
             result = wstool.multiproject_cmd.cmd_snapshot(self.mock_config)
             self.assertEqual(1, len(result))
             self.assertEqual('spec', result[0]['git']['version'])
@@ -758,7 +760,7 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
                                         version='version',
                                         actualversion=None,
                                         specversion=None)
-            self.mock_config = FakeConfig([mock], 'foopath')
+            self.mock_config = FakeConfig([mock], [], 'foopath')
             result = wstool.multiproject_cmd.cmd_snapshot(self.mock_config)
             self.assertEqual(1, len(result))
             self.assertEqual('version', result[0]['git']['version'])
