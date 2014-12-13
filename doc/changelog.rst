@@ -1,3 +1,10 @@
+0.1.5
+-----
+
+- Releasing to allow changes for new platform vivid.
+- Fix svn diff for change in output with svn 1.7.9.
+- info command shows information about unmanaged paths.
+
 0.1.4
 -----
 
