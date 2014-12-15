@@ -41,6 +41,8 @@ from wstool.config_yaml import PathSpec
 
 from . import mock_client
 
+_test_root = os.path.dirname(os.path.dirname(__file__))
+
 
 class MockVcsConfigElement(wstool.config_elements.VCSConfigElement):
 
@@ -102,9 +104,9 @@ class ConfigSimple_Test(unittest.TestCase):
         self.assertEqual(install_path, config.get_base_path())
         self.assertEqual([], config.get_config_elements())
         config = Config([PathSpec("foo"),
-                         PathSpec(os.path.join("test", "example_dirs", "ros_comm")),
-                         PathSpec(os.path.join("test", "example_dirs", "ros")),
-                         PathSpec(os.path.join("test", "example_dirs", "roscpp")),
+                         PathSpec(os.path.join(_test_root, "example_dirs", "ros_comm")),
+                         PathSpec(os.path.join(_test_root, "example_dirs", "ros")),
+                         PathSpec(os.path.join(_test_root, "example_dirs", "roscpp")),
                          PathSpec("bar")],
                         ".",
                         None)
