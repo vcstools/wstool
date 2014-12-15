@@ -72,7 +72,7 @@ class RosinstallInteractive(AbstractFakeRosBasedTest):
 
         self.rel_uri_rosinstall = os.path.join(self.test_root_path, "rel_uri.rosinstall")
         _create_yaml_file([_create_config_elt_dict("git", "ros", self.ros_path),
-                           _create_config_elt_dict("git", "gitrepo", os.path.relpath(self.git_path))],
+                           _create_config_elt_dict("git", "gitrepo", os.path.relpath(self.git_path, self.directory))],
                           self.rel_uri_rosinstall)
 
         config = wstool.multiproject_cmd.get_config(self.directory, [self.rel_uri_rosinstall, self.ros_path])
@@ -85,7 +85,7 @@ class RosinstallInteractive(AbstractFakeRosBasedTest):
 
         self.rel_uri_rosinstall2 = os.path.join(self.test_root_path, "rel_uri.wstool2")
         # switch URIs to confuse config
-        _create_yaml_file([_create_config_elt_dict("git", "ros", os.path.relpath(self.git_path)),
+        _create_yaml_file([_create_config_elt_dict("git", "ros", os.path.relpath(self.git_path, self.directory)),
                            _create_config_elt_dict("git", "gitrepo", self.ros_path)],
                           self.rel_uri_rosinstall2)
 

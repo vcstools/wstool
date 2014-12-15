@@ -42,11 +42,13 @@ from wstool.config_yaml import rewrite_included_source, \
     get_path_spec_from_yaml, get_yaml_from_uri, get_path_specs_from_uri, \
     PathSpec, aggregate_from_uris
 
+_test_root = os.path.dirname(os.path.dirname(__file__))
+
 
 class YamlIO_Test(unittest.TestCase):
 
     def test_get_yaml_from_uri_from_file(self):
-        filename = os.path.join("test", "example.yaml")
+        filename = os.path.join(_test_root, "example.yaml")
         yamlstr = get_yaml_from_uri(filename)
 
         self.assertTrue("text" in yamlstr)
@@ -57,7 +59,7 @@ class YamlIO_Test(unittest.TestCase):
         # invalid
         try:
             yaml = get_yaml_from_uri(
-                os.path.join("test", "example-broken.yaml"))
+                os.path.join(_test_root, "example-broken.yaml"))
         except MultiProjectException:
             pass
         try:
