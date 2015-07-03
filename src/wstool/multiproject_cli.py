@@ -993,6 +993,7 @@ The Status (S) column shows
  x  for missing
  L  for uncommited (local) changes
  V  for difference in version and/or remote URI
+ C  for difference in local and remote versions
 
 The 'Version-Spec' column shows what tag, branch or revision was given
 in the .rosinstall file. The 'UID' column shows the unique ID of the
@@ -1030,6 +1031,10 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
         parser.add_option(
             "--yaml", dest="yaml", default=False,
             help="Shows only version of single entry. Intended for scripting.",
+            action="store_true")
+        parser.add_option(
+            "--fetch", dest="fetch", default=False,
+            help="When used, retrieves version information from remote (takes longer).",
             action="store_true")
         parser.add_option(
             "-u", "--untracked", dest="untracked",
@@ -1081,7 +1086,8 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
         # this call takes long, as it invokes scms.
         outputs = multiproject_cmd.cmd_info(config,
                                             localnames=args,
-                                            untracked=options.untracked)
+                                            untracked=options.untracked,
+                                            fetch=options.fetch)
         if args and len(args) == 1:
             # if only one element selected, print just one line
             print(get_info_list(config.get_base_path(),

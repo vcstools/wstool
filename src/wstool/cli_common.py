@@ -119,6 +119,28 @@ def _uris_match(basepath, uri1, uri2):
     return False
 
 
+def _get_svn_version_from_uri(uri):
+    """
+    in case of SVN, we can use the final part of
+    standard uri as spec version, if it follows canonical SVN layout
+
+    :param uri: uri to extract version from
+    :returns changed_uri: str, version extracted uri
+    :returns version: str, extracted version
+    :returns: (None, None), for empty uri or when there is no regex match for version info
+    """
+    if uri is None:
+        return None, None
+    match = re.match('(.*/)((tags|branches|trunk)(/.*)*)', uri)
+    if (match is not None and
+            len(match.groups()) > 1 and
+            uri == ''.join(match.groups()[0:2])):
+        changed_uri = match.groups()[0]
+        version = match.groups()[1]
+        return changed_uri, version
+    return None, None
+
+
 def _get_status_flags(basepath, elt_dict):
     """
     returns a string where each char conveys status information about
@@ -140,6 +162,13 @@ def _get_status_flags(basepath, elt_dict):
          elt_dict['actualversion'] is not None and
          elt_dict['specversion'] != elt_dict['actualversion'])):
         mflag += 'V'
+    if ('remote_revision' in elt_dict and
+        elt_dict['remote_revision'] != '' and
+        elt_dict['remote_revision'] is not None and
+        elt_dict['actualversion'] is not None and
+        'actualversion' in elt_dict and
+        elt_dict['remote_revision'] != elt_dict['actualversion']):
+        mflag += 'C'
     return mflag
 
 
@@ -158,6 +187,10 @@ def get_info_table_elements(basepath, entries):
             line['curr_version'] = None
         if not 'version' in line:
             line['version'] = None
+        if not 'remote_revision' in line:
+            line['remote_revision'] = None
+        if not 'curr_version_label' in line:
+            line['curr_version_label'] = None
         output_dict = {'scm': line['scm'],
                        'uri': line['uri'],
                        'curr_uri': None,
@@ -173,46 +206,31 @@ def get_info_table_elements(basepath, entries):
                 line['specversion'] = line['specversion'][0:12]
             if (line['actualversion'] is not None and len(line['actualversion']) > 12):
                 line['actualversion'] = line['actualversion'][0:12]
+            if (line['remote_revision'] is not None and len(line['remote_revision']) > 12):
+                line['remote_revision'] = line['remote_revision'][0:12]
 
         if line['scm'] is not None:
 
             if line['scm'] == 'svn':
-                # in case of SVN, we can use the final part of
-                # standard uri as version
-                uri = line['uri']
-                version = line['version']
-                match = re.match('(.*/)((tags|branches|trunk)(/.*)*)', uri)
-                if match is not None and len(match.groups()) > 1 and uri == ''.join(match.groups()[0:2]):
-                    uri = match.groups()[0]
-                    if (match.groups()[1] is not None and version is None or version.strip() == ''):
-                        version = match.groups()[1]
-                    else:
-                        version = match.groups()[1]
-                    line['uri'] = uri
-                    line['version'] = version
+                (line['uri'],
+                line['version']) = _get_svn_version_from_uri(uri=line['uri'])
                 if line['curr_uri'] is not None:
-                    uri = line['curr_uri']
-                    match = re.match('(.*/)((tags|branches|trunk)(/.*)*)', uri)
-                    if match is not None and len(match.groups()) > 1 and uri == ''.join(match.groups()[0:2]):
-                        uri = match.groups()[0]
-                        if (match.groups()[1] is not None and version is None or version.strip() == ''):
-                            version = match.groups()[1]
-                        else:
-                            version = match.groups()[1]
-                        line['curr_uri'] = uri
-                        line['curr_version'] = version
+                    (line['curr_uri'],
+                     line['curr_version_label']) = _get_svn_version_from_uri(
+                         uri=line['curr_uri'])
 
-            if (line['curr_version'] is not None and
-                line['version'] != line['curr_version']):
+            if line['scm'] in ['git', 'svn', 'hg']:
+                line['curr_version'] = line['curr_version_label']
 
-                output_dict['version'] = "%s  (%s)" % (line['curr_version'], line['version'])
-            else:
-                output_dict['version'] = line['version']
+            if line['curr_version'] is not None:
+                output_dict['version'] = line['curr_version']
+            if output_dict['version'] is not None:
+                if (line['version'] != output_dict['version']):
+                    output_dict['version'] += "  (%s)" % (line['version'] or '-')
 
             if (line['specversion'] is not None and
                 line['specversion'] != '' and
                 line['actualversion'] != line['specversion']):
-
                 output_dict['matching'] = "%s (%s)" % (line['actualversion'], line['specversion'])
             else:
                 output_dict['matching'] = line['actualversion']
@@ -263,7 +281,7 @@ def get_info_table(basepath, entries, data_only=False, reverse=False, unmanaged=
             'uri': "URI  (Spec) [http(s)://...]",
             'scm': "SCM ",
             'localname': "Localname",
-            'version': "Version-Spec",
+            'version': "Version (Spec)",
             'matching': "UID  (Spec)",
             'status': "S"}
 
@@ -332,7 +350,8 @@ def get_info_list(basepath, line, data_only=False):
         'scm': "SCM:",
         'localname': "Localname:",
         'path': "Path",
-        'version': "Version-Spec:",
+        'version': "Spec-Version:",
+        'curr_version_label': "Current-Version:",
         'status': "Status:",
         'specversion': "Spec-Revision:",
         'actualversion': "Current-Revision:",
@@ -341,8 +360,8 @@ def get_info_list(basepath, line, data_only=False):
     # table design
     selected_headers = ['localname', 'path', 'status',
                         'scm', 'uri', 'curr_uri',
-                        'version', 'specversion', 'actualversion',
-                        'properties']
+                        'version', 'curr_version_label', 'specversion',
+                        'actualversion', 'properties']
 
     line['status'] = _get_status_flags(basepath, line)
 

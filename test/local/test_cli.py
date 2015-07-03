@@ -558,7 +558,7 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
                     'localname': 'localname',
                     'specversion': None,
                     'actualversion': None}]
-        self.assertEqual(["localname", "svn", "tags/tagname", "some.svn.tags.server/some/"], _nth_line_split(-1, wstool.cli_common.get_info_table(basepath, entries)))
+        self.assertEqual(["localname", "svn", "version", "(tags/tagname)", "some.svn.tags.server/some/"], _nth_line_split(-1, wstool.cli_common.get_info_table(basepath, entries)))
         entries = [{'scm': 'svn',
                     'uri': 'https://some.svn.tags.server/some/branches/branchname',
                     'curr_uri': None,
@@ -566,7 +566,7 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
                     'localname': 'localname',
                     'specversion': None,
                     'actualversion': None}]
-        self.assertEqual(["localname", "svn", "branches/branchname", "some.svn.tags.server/some/"], _nth_line_split(-1, wstool.cli_common.get_info_table(basepath, entries)))
+        self.assertEqual(["localname", "svn", "version", "(branches/branchname)", "some.svn.tags.server/some/"], _nth_line_split(-1, wstool.cli_common.get_info_table(basepath, entries)))
         entries = [{'scm': 'svn',
                     'uri': 'https://some.svn.tags.server/some/trunk',
                     'curr_uri': None,
@@ -574,7 +574,7 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
                     'localname': 'localname',
                     'specversion': None,
                     'actualversion': None}]
-        self.assertEqual(["localname", "svn", "trunk", "some.svn.tags.server/some/"], _nth_line_split(-1, wstool.cli_common.get_info_table(basepath, entries)))
+        self.assertEqual(["localname", "svn", "version", "(trunk)", "some.svn.tags.server/some/"], _nth_line_split(-1, wstool.cli_common.get_info_table(basepath, entries)))
         entries = [{'scm': 'svn',
                     'uri': 'https://some.svn.tags.server/some/branches/branchname',
                     'curr_uri': 'https://some.svn.tags.server/some/tags/tagname',

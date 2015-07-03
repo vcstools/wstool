@@ -261,7 +261,7 @@ class WstoolInfoSvnTest(AbstractSCMTest):
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'MV', 'svn', '1', self.version_end, "(%s)" % self.version_init, self.svn_uri], tokens)
+        self.assertEqual(['clone', 'MV', 'svn', '1', '(-)', self.version_end, "(%s)" % self.version_init, self.svn_uri], tokens)
 
         subprocess.check_call(["rm", "-rf", "clone"], cwd=self.local_path)
         os.chdir(self.test_root_path)
@@ -269,4 +269,4 @@ class WstoolInfoSvnTest(AbstractSCMTest):
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'x', 'svn', '1', self.svn_uri], tokens)
+        self.assertEqual(['clone', 'x', 'svn', '(-)', self.svn_uri], tokens)
