@@ -217,8 +217,9 @@ def prompt_merge(target_path,
                 additional_uris=[],
                 config_filename=config_filename)
             config_actions = multiproject_cmd.add_uris(
-                newconfig,
+                config=newconfig,
                 additional_uris=additional_uris,
+                config_filename=None,
                 merge_strategy=merge_strategy,
                 allow_other_element=allow_other_element)
             for path_spec in additional_specs:
@@ -450,7 +451,7 @@ $ %(prog)s init ~/fuerte /opt/ros/fuerte
         config = multiproject_cmd.get_config(
             basepath=target_path,
             additional_uris=config_uris,
-            # catkin workspaces have no resaonable wstool chaining semantics
+            # catkin workspaces have no reasonable chaining semantics
             # config_filename=self.config_filename
             )
         if config_uris and len(config.get_config_elements()) == 0:
