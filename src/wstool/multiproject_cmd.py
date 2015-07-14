@@ -104,13 +104,19 @@ def get_config(basepath,
                     config_filename=config_filename,
                     merge_strategy=merge_strategy)
 
-    add_uris(config, additional_uris, merge_strategy)
+    add_uris(config=config,
+             additional_uris=additional_uris,
+             config_filename=config.get_config_filename(),
+             merge_strategy=merge_strategy)
 
     return config
 
 
 def add_uris(config,
              additional_uris,
+             # config_filename is not redundant with config.get_config_filename()
+             # because in some cases a different config_filename is required
+             config_filename=None,
              merge_strategy="KillAppend",
              allow_other_element=True):
     """
@@ -133,7 +139,7 @@ def add_uris(config,
     if not additional_uris:
         return {}
 
-    if config.get_config_filename() is None:
+    if config_filename is None:
         added_uris = additional_uris
     else:
         added_uris = []
@@ -143,11 +149,11 @@ def add_uris(config,
             # check whether we try to merge with other workspace
             comp_uri = None
             if (os.path.isfile(uri)
-                and os.path.basename(uri) == config.get_config_filename()):
+                and os.path.basename(uri) == config_filename):
                 # add from other workspace by file
                 comp_uri = os.path.dirname(uri)
             if (os.path.isdir(uri)
-                and os.path.isfile(os.path.join(uri, config.get_config_filename()))):
+                and os.path.isfile(os.path.join(uri, config_filename))):
                 # add from other workspace by dir
                 comp_uri = uri
             if (comp_uri is not None and
@@ -160,7 +166,7 @@ def add_uris(config,
     actions = {}
     if len(added_uris) > 0:
         path_specs = aggregate_from_uris(added_uris,
-                                         config.get_config_filename(),
+                                         config_filename,
                                          allow_other_element)
         for path_spec in path_specs:
             action = config.add_path_spec(path_spec, merge_strategy)
