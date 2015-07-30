@@ -309,7 +309,7 @@ class DistributedWork():
         self.threads = []
         self.sequentializers = {}
         self.index = 0
-        self.num_threads = num_threads
+        self.num_threads = capacity if num_threads <= 0  else max(num_threads, capacity)
         self.silent = silent
 
     def add_thread(self, worker):

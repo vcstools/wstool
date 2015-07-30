@@ -238,7 +238,7 @@ def cmd_status(config, localnames=None, untracked=False):
     path = config.get_base_path()
     # call SCM info in separate threads
     elements = config.get_config_elements()
-    work = DistributedWork(len(elements))
+    work = DistributedWork(capacity=len(elements), num_threads=-1)
     elements = select_elements(config, localnames)
     for element in elements:
         if element.is_vcs_element():
@@ -265,7 +265,7 @@ def cmd_diff(config, localnames=None):
 
     path = config.get_base_path()
     elements = config.get_config_elements()
-    work = DistributedWork(len(elements))
+    work = DistributedWork(capacity=len(elements), num_threads=-1)
     elements = select_elements(config, localnames)
     for element in elements:
         if element.is_vcs_element():
@@ -345,7 +345,9 @@ def cmd_install_or_update(
                                  verbose=self.report.verbose)
             return {}
 
-    work = DistributedWork(len(preparation_reports), num_threads, silent=False)
+    work = DistributedWork(capacity=len(preparation_reports),
+                           num_threads=num_threads,
+                           silent=False)
     for report in preparation_reports:
         report.verbose = verbose
         report.timeout = timeout
@@ -461,7 +463,7 @@ def cmd_info(config, localnames=None, untracked=False):
     # call SCM info in separate threads
     elements = config.get_config_elements()
     elements = select_elements(config, localnames)
-    work = DistributedWork(len(elements))
+    work = DistributedWork(capacity=len(elements), num_threads=-1)
     for element in elements:
         if element.get_properties() is None or not 'setup-file' in element.get_properties():
             work.add_thread(InfoRetriever(element, path, untracked))
@@ -514,7 +516,7 @@ def cmd_find_unmanaged_repos(config):
                     unmanaged_paths.append((os.path.relpath(root, path), key))
                     # don't walk any other directories in this root
                     del dirs[:]
-    work = DistributedWork(len(unmanaged_paths))
+    work = DistributedWork(capacity=len(unmanaged_paths), num_threads=-1)
     for localname, scm_type in sorted(unmanaged_paths, key=lambda up: up[0], reverse=True):
         work.add_thread(UnmanagedInfoRetriever(path, localname, scm_type))
     outputs = work.run()
