@@ -712,6 +712,9 @@ $ %(progname)s set robot_model --version-new robot_model-1.7.1
         parser.add_option("-y", "--confirm", dest="confirm", default='',
                           help="Do not ask for confirmation",
                           action="store_true")
+        parser.add_option("-u", "--update", dest="do_update", default=False,
+                          help="update repository after set",
+                          action="store_true")
         # -t option required here for help but used one layer above, see cli_common
         parser.add_option(
             "-t", "--target-workspace", dest="workspace", default=None,
@@ -800,14 +803,15 @@ $ %(progname)s set robot_model --version-new robot_model-1.7.1
                             scmtype=scmtype)
         else:
             # modify
+            localname = element.get_local_name()
             old_spec = element.get_path_spec()
             if options.detach:
-                spec = PathSpec(local_name=element.get_local_name())
+                spec = PathSpec(local_name=localname)
             else:
                 # '' evals to False, we do not want that
                 if version is None:
                     version = old_spec.get_version()
-                spec = PathSpec(local_name=element.get_local_name(),
+                spec = PathSpec(local_name=localname,
                                 uri=normalize_uri(uri or old_spec.get_uri(),
                                                   config.get_base_path()),
                                 version=version,
@@ -839,7 +843,13 @@ $ %(progname)s set robot_model --version-new robot_model-1.7.1
                 os.path.join(newconfig.get_base_path(), self.config_filename),
                 "%s.bak" % os.path.join(newconfig.get_base_path(), self.config_filename))
             self.config_generator(newconfig, self.config_filename)
-            if (spec.get_scmtype() is not None):
+            if options.do_update:
+                install_success = multiproject_cmd.cmd_install_or_update(
+                                        newconfig, localnames=[localname])
+                if not install_success:
+                    print("Warning: installation encountered errors.")
+                print("\nupdate complete.")
+            elif (spec.get_scmtype() is not None):
                 print("Config changed, remember to run '%s update %s' to update the folder from %s" %
                       (self.progname, spec.get_local_name(), spec.get_scmtype()))
         else:

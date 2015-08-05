@@ -657,6 +657,10 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
                                          "--hg",
                                          'http://some_uri',
                                          '-y']))
+        cli.cmd_set(self.local_path,
+                    [os.path.join(self.local_path, 'hgrepo'), self.hg_path,
+                     '--hg', '--update', '-y'])
+        self.assertTrue(os.path.exists(os.path.join(self.local_path, 'hgrepo')))
         self.assertRaises(SystemExit, cli.cmd_set, self.local_path,
                           [os.path.join(self.local_path, 'hgrepo'),
                            "--detached",
