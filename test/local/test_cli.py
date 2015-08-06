@@ -648,6 +648,12 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
         self.assertTrue(os.path.exists(os.path.join(self.local_path, 'gitrepo')))
         self.assertTrue(os.path.exists(os.path.join(self.local_path, 'hgrepo')))
 
+    def test_cmd_info(self):
+        self.local_path = os.path.join(self.test_root_path, "ws_test_cmd_info")
+        cli = MultiprojectCLI(progname='multi_cli',
+                              config_filename='.rosinstall')
+        self.assertEqual(0, cli.cmd_info(self.local_path, ['--root']))
+
     def test_cmd_set(self):
         self.local_path = os.path.join(self.test_root_path, "ws31b")
         cli = MultiprojectCLI(progname='multi_cli', config_filename='.rosinstall')
