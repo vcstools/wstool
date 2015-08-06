@@ -1016,6 +1016,10 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
 """ % {'prog': self.progname, 'opts': ONLY_OPTION_VALID_ATTRS},
             epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
         parser.add_option(
+            "--root", dest="show_ws_root", default=False,
+            help="Show workspace root path",
+            action="store_true")
+        parser.add_option(
             "--data-only", dest="data_only", default=False,
             help="Does not provide explanations",
             action="store_true")
@@ -1051,6 +1055,10 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
         elif config.get_base_path() != target_path:
             raise MultiProjectException("Config path does not match %s %s " %
                                         (config.get_base_path(), target_path))
+
+        if options.show_ws_root:
+            print(config.get_base_path())
+            return 0
 
         if args == []:
             args = None
