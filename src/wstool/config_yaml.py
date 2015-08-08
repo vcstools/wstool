@@ -323,7 +323,7 @@ def get_path_spec_from_yaml(yaml_dict):
     tags = []
     if type(yaml_dict) != dict:
         raise MultiProjectException(
-            "Yaml for each element must be in YAML dict form")
+            "Yaml for each element must be in YAML dict form: %s " % yaml_dict)
     # old syntax:
 # - hg: {local-name: common_rosdeps,
 #        version: common_rosdeps-1.0.2,
