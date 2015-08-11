@@ -32,6 +32,7 @@
 
 
 import os
+import sys
 import shutil
 import datetime
 
@@ -405,6 +406,9 @@ class VCSConfigElement(ConfigElement):
         if version is not None:
             # revision is the UID of the version spec, can be them same
             revision = self._get_vcsc().get_version(self.version)
+            if revision is None:
+                sys.stderr.write("Warning: version '%s' not found for '%s'\n"
+                                  % (self.version, self.local_name))
         currevision = self._get_vcsc().get_version()
         uri = self.uri
         curr_uri = self._get_vcsc().get_url()
