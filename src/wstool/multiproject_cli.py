@@ -61,13 +61,14 @@ __MULTIPRO_CMD_DICT__ = {
     "remove":   "remove an entry from your workspace config, without deleting files",
     "snapshot": "write a file specifying repositories to have the version they currently have",
     "diff":     "print a diff over some SCM controlled entries",
+    "foreach":  "run shell command in given entries",
     "status":   "print the change status of files in some SCM controlled entries"}
 
 # usage help ordering and sections
 __MULTIPRO_CMD_HELP_LIST__ = ['help', 'init',
                               None, 'set', 'merge', 'remove',
                               None, 'update',
-                              None, 'info', 'status', 'diff']
+                              None, 'info', 'status', 'diff', 'foreach']
 
 # command aliases
 __MULTIPRO_CMD_ALIASES__ = {'update': 'up',
@@ -620,6 +621,106 @@ $ roslocate info robot_model | %(prog)s merge -
             print(result)
 
         return False
+
+    def cmd_foreach(self, target_path, argv, config=None):
+        """Run shell commands in each repository."""
+        parser = OptionParser(
+            usage=('usage: %s foreach [[localname]* | [VCSFILTER]*]'
+                   ' [command] [OPTIONS]' % self.progname),
+            description=__MULTIPRO_CMD_DICT__['foreach'],
+            epilog='See: http://www.ros.org/wiki/rosinstall for details')
+        parser.add_option('--shell', default=False,
+                          help='use the shell as the program to execute',
+                          action='store_true')
+        parser.add_option('--no-stdout', dest='show_stdout',
+                          default=True,
+                          help='do not show stdout',
+                          action='store_false')
+        parser.add_option('--no-stderr', dest='show_stderr',
+                          default=True,
+                          help='do not show stderr',
+                          action='store_false')
+        parser.add_option("--git", dest="git", default=False,
+                          help="run command in git entries",
+                          action="store_true")
+        parser.add_option("--svn", dest="svn", default=False,
+                          help="run command in svn entries",
+                          action="store_true")
+        parser.add_option("--hg", dest="hg", default=False,
+                          help="run command in hg entries",
+                          action="store_true")
+        parser.add_option("--bzr", dest="bzr", default=False,
+                          help="run command in bzr entries",
+                          action="store_true")
+        # -t option required here for help but used one layer above
+        # see cli_common
+        parser.add_option("-t", "--target-workspace", dest="workspace",
+                          default=None,
+                          help="which workspace to use",
+                          action="store")
+        (options, args) = parser.parse_args(argv)
+
+        if args:
+            localnames, command = args[:-1], args[-1]
+            localnames = localnames if localnames else None
+        else:
+            print("Error: Too few arguments.")
+            print(parser.usage)
+            return -1
+
+        scm_types = []
+        if options.git:
+            scm_types.append('git')
+        if options.svn:
+            scm_types.append('svn')
+        if options.hg:
+            scm_types.append('hg')
+        if options.bzr:
+            scm_types.append('bzr')
+        if not scm_types:
+            scm_types = None
+
+        if localnames and scm_types:
+            sys.stderr.write("Error: Either localnames or scm-filters"
+                             " [--(git|svn|hg|bzr)] should be specified.\n")
+            return -1
+
+        if config is None:
+            config = multiproject_cmd.get_config(
+                target_path,
+                additional_uris=[],
+                config_filename=self.config_filename)
+        elif config.get_base_path() != target_path:
+            raise MultiProjectException('Config path does not match %s %s' %
+                                        (config.get_base_path(), target_path))
+
+        # run shell command
+        outputs = multiproject_cmd.cmd_foreach(config,
+                                               command=command,
+                                               localnames=localnames,
+                                               scm_types=scm_types,
+                                               shell=options.shell)
+
+        def add_localname_prefix(localname, lines):
+            return ['[%s] %s' % (localname, line) for line in lines]
+
+        for output in outputs:
+            localname = output['entry'].get_local_name()
+            if options.show_stdout:
+                if output['stdout'] is None:
+                    continue
+                lines = output['stdout'].strip().split('\n')
+                lines = add_localname_prefix(localname, lines)
+                sys.stdout.write('\n'.join(lines))
+                sys.stdout.write('\n')
+            if options.show_stderr:
+                if output['stderr'] is None:
+                    continue
+                lines = output['stderr'].strip().split('\n')
+                lines = add_localname_prefix(localname, lines)
+                sys.stderr.write('\n'.join(lines))
+                sys.stderr.write('\n')
+        return 0
 
     def cmd_status(self, target_path, argv, config=None):
         parser = OptionParser(usage="usage: %s status [localname]* " % self.progname,

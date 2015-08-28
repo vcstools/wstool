@@ -141,6 +141,7 @@ def wstool_main(argv=None, usage=None):
             'set': cli.cmd_set,
             'merge': cli.cmd_merge,
             'diff': cli.cmd_diff,
+            'foreach': cli.cmd_foreach,
             'status': cli.cmd_status,
             'update': cli.cmd_update}
         for label in list(ws_commands.keys()):

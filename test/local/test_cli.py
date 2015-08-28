@@ -51,6 +51,7 @@ from wstool.config_yaml import PathSpec
 
 from test.scm_test_base import AbstractFakeRosBasedTest, _add_to_file, \
     _nth_line_split, _create_yaml_file, _create_config_elt_dict
+from test.io_wrapper import StringIO
 from . import mock_client
 
 
@@ -679,6 +680,24 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
                                          "--detached",
                                          '-y']))
 
+    def test_cmd_foreach(self):
+        self.local_path = os.path.join(self.test_root_path, 'foreach')
+        cli = MultiprojectCLI(progname='multi_cli', config_filename='.rosinstall')
+        cli.cmd_init([self.local_path, self.simple_rosinstall])
+        # specified localname
+        sys.stdout = f = StringIO()
+        cli.cmd_foreach(self.local_path, argv=['gitrepo', 'pwd'])
+        sys.stdout = sys.__stdout__
+        repo_path = lambda localname: os.path.join(self.local_path, localname)
+        self.assertEqual('[gitrepo] %s' % repo_path('gitrepo'),
+                         f.getvalue().strip())
+        # --git option
+        sys.stdout = f = StringIO()
+        cli.cmd_foreach(self.local_path, argv=['--git', 'pwd'])
+        sys.stdout = sys.__stdout__
+        expected_output = '[ros] %s\n[gitrepo] %s' % (repo_path('ros'),
+                                                      repo_path('gitrepo'))
+        self.assertEqual(expected_output, f.getvalue().strip())
 
     def test_cmd_remove(self):
         # wstool to create dir

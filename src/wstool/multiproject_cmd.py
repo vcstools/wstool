@@ -45,6 +45,7 @@ A change to expect is abstraction of user interaction.
 
 import sys
 import os
+import shlex
 from wstool.common import MultiProjectException, DistributedWork, \
     select_elements, normabspath
 from wstool.config import Config, realpath_relation
@@ -54,6 +55,7 @@ from wstool.config_yaml import aggregate_from_uris, generate_config_yaml, \
 
 import vcstools
 import vcstools.__version__
+from vcstools.common import run_shell_command
 from vcstools.vcs_abstraction import get_vcs_client
 from vcstools.git import GitClient
 from vcstools.hg  import HgClient
@@ -270,6 +272,36 @@ def cmd_diff(config, localnames=None):
     for element in elements:
         if element.is_vcs_element():
             work.add_thread(DiffRetriever(element, path))
+    outputs = work.run()
+    return outputs
+
+
+def cmd_foreach(config, command, localnames=None, scm_types=None, shell=False):
+    """Run command in all SCM entries in config, relative to path"""
+
+    class ForeachRetriever(object):
+        def __init__(self, element, command, shell):
+            self.element = element
+            self.command = command
+            self.shell = shell
+
+        def do_work(self):
+            command = self.command
+            if not self.shell:
+                command = shlex.split(command)
+            _, stdout, stderr = run_shell_command(command,
+                                                  cwd=self.element.path,
+                                                  show_stdout=False,
+                                                  shell=self.shell)
+            return {'stdout': stdout, 'stderr': stderr}
+
+    elements = select_elements(config, localnames)
+    work = DistributedWork(capacity=len(elements))
+    for element in elements:
+        if ((scm_types is not None) and
+                (element.get_vcs_type_name() not in scm_types)):
+            continue
+        work.add_thread(ForeachRetriever(element, command, shell))
     outputs = work.run()
     return outputs
 
