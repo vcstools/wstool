@@ -87,7 +87,7 @@ class GetWorkspaceTest(unittest.TestCase):
     def setUpClass(self):
         self.environback = copy.copy(os.environ)
         self.new_environ = os.environ
-        self.test_root_path = tempfile.mkdtemp()
+        self.test_root_path = os.path.realpath(tempfile.mkdtemp())
         self.install_path = os.path.join(self.test_root_path, "install")
         os.makedirs(self.install_path)
         self.install_path2 = os.path.join(self.test_root_path, "install2")
@@ -264,7 +264,7 @@ class MockVcsConfigElement(wstool.config_elements.VCSConfigElement):
 class InstallTest(unittest.TestCase):
 
     def test_mock_install(self):
-        test_root = tempfile.mkdtemp()
+        test_root = os.path.realpath(tempfile.mkdtemp())
         try:
             git1 = PathSpec('foo', 'git', 'git/uri', 'git.version')
             svn1 = PathSpec('foos', 'svn', 'svn/uri', '12345')
@@ -287,7 +287,7 @@ class InstallTest(unittest.TestCase):
             shutil.rmtree(test_root)
 
     def test_mock_install_fail(self):
-        test_root = tempfile.mkdtemp()
+        test_root = os.path.realpath(tempfile.mkdtemp())
         try:
             # robust
             git1 = PathSpec('foo', 'git', 'git/uri', 'git.version')
@@ -396,7 +396,7 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
         self.assertEqual(result[3]['scm'], 'bzr')
 
     def test_unmanaged(self):
-        root_path = tempfile.mkdtemp()
+        root_path = os.path.realpath(tempfile.mkdtemp())
         ws_path = os.path.join(root_path, "ws")
         os.makedirs(ws_path)
 
@@ -436,7 +436,7 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
         self.assertEqual(len(result), 3)
 
     def test_info_real_path(self):
-        root_path = tempfile.mkdtemp()
+        root_path = os.path.realpath(tempfile.mkdtemp())
         el_path = os.path.join(root_path, "ros")
         os.makedirs(el_path)
         try:
@@ -476,7 +476,7 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
             shutil.rmtree(root_path)
 
     def test_get_status(self):
-        self.test_root_path = tempfile.mkdtemp()
+        self.test_root_path = os.path.realpath(tempfile.mkdtemp())
         try:
             basepath = '/foo/path'
             entry = {}
@@ -792,7 +792,7 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
         self.assertTrue(os.path.exists(os.path.join(self.local_path, 'hgrepo')))
 
     def test_export(self):
-        root_path = tempfile.mkdtemp()
+        root_path = os.path.realpath(tempfile.mkdtemp())
         el_path = os.path.join(root_path, "ros")
         os.makedirs(el_path)
         try:

@@ -162,7 +162,7 @@ class AbstractFakeRosBasedTest(AbstractRosinstallBaseDirTest):
     def setUpClass(self):
         AbstractRosinstallBaseDirTest.setUpClass()
         # create a dir mimicking ros
-        self.test_root_path = tempfile.mkdtemp()
+        self.test_root_path = os.path.realpath(tempfile.mkdtemp())
         _create_fake_ros_dir(self.test_root_path)
         # create a repo in git
         self.ros_path = os.path.join(self.test_root_path, "ros")
