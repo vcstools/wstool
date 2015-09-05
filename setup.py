@@ -20,7 +20,7 @@ setup(name='wstool',
       packages=['wstool'],
       package_dir={'': 'src'},
       # rosinstall dependency to be kept in order not to break ros hydro install instructions
-      install_requires=['vcstools>=0.1.34', 'pyyaml'],
+      install_requires=['vcstools>=0.1.37', 'pyyaml'],
       scripts=["scripts/wstool"],
       author="Tully Foote",
       author_email="tfoote@osrfoundation.org",
