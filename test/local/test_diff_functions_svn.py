@@ -115,7 +115,9 @@ Index: clone/modified.txt
 @@ -0,0 +1 @@
 +foo"""]
         for snippet in expected:
-            self.assertTrue(snippet in output, output)
+            for line in snippet.splitlines():
+                # assertIn is not supported in Python2.6
+                self.assertTrue(line in output, output)
 
     def test_wstool_diff_svn_outside(self):
         """Test diff output for svn when run outside workspace"""
