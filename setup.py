@@ -1,4 +1,6 @@
 from setuptools import setup
+from distutils.command.build import build
+from distutils.command.build_py import build_py
 
 import os
 import sys
@@ -55,11 +57,48 @@ parser.add_argument('--prefix', default='',
 opts, _ = parser.parse_known_args(sys.argv)
 prefix = opts.prefix
 
+data_files = get_data_files(prefix)
+
+# At present setuptools has no methods to resolve dependencies at build time,
+# so we need to check if sphinx is installed.
+# See: https://github.com/pypa/pip/issues/2381
+try:
+    from sphinx.setup_command import BuildDoc
+    HAVE_SPHINX = True
+except:
+    HAVE_SPHINX = False
+
+if HAVE_SPHINX:
+    class WstoolBuildMan(BuildDoc):
+        def initialize_options(self):
+            BuildDoc.initialize_options(self)
+            self.builder = 'man'
+    class WstoolBuild(build):
+        """Run additional commands before build command"""
+        def run(self):
+            self.run_command('build_man')
+            build.run(self)
+    class WstoolBuildPy(build_py):
+        """Run additional commands before build_py command"""
+        def run(self):
+            self.run_command('build_man')
+            build_py.run(self)
+    cmdclass = dict(
+        build=WstoolBuild,
+        build_py=WstoolBuildPy,
+        build_man=WstoolBuildMan,
+    )
+    man_dest = os.path.join(_resolve_prefix(prefix, 'man'), 'man/man1')
+    data_files.append((man_dest, ['build/sphinx/man/wstool.1']))
+else:
+    cmdclass = {}
+
 setup(name='wstool',
       version=get_version(),
       packages=['wstool'],
       package_dir={'': 'src'},
-      data_files=get_data_files(prefix),
+      data_files=data_files,
+      cmdclass=cmdclass,
       # rosinstall dependency to be kept in order not to break ros hydro install instructions
       install_requires=['vcstools>=0.1.34', 'pyyaml'],
       scripts=["scripts/wstool"],
