@@ -192,7 +192,7 @@ class AbstractSCMTest(AbstractRosinstallCLITest):
     def setUpClass(self):
         """creates a directory 'ros' mimicking to be a ROS root to rosinstall"""
         AbstractRosinstallCLITest.setUpClass()
-        self.test_root_path = tempfile.mkdtemp()
+        self.test_root_path = os.path.realpath(tempfile.mkdtemp())
         self.directories = {}
         self.directories["root"] = self.test_root_path
 
