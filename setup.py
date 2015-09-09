@@ -73,11 +73,13 @@ if HAVE_SPHINX:
         def initialize_options(self):
             BuildDoc.initialize_options(self)
             self.builder = 'man'
+
     class WstoolBuild(build):
         """Run additional commands before build command"""
         def run(self):
             self.run_command('build_man')
             build.run(self)
+
     class WstoolBuildPy(build_py):
         """Run additional commands before build_py command"""
         def run(self):
