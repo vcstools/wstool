@@ -51,6 +51,7 @@ from wstool.config_yaml import PathSpec
 
 from test.scm_test_base import AbstractFakeRosBasedTest, _add_to_file, \
     _nth_line_split, _create_yaml_file, _create_config_elt_dict
+from test.io_wrapper import StringIO
 from . import mock_client
 
 
@@ -86,7 +87,7 @@ class GetWorkspaceTest(unittest.TestCase):
     def setUpClass(self):
         self.environback = copy.copy(os.environ)
         self.new_environ = os.environ
-        self.test_root_path = tempfile.mkdtemp()
+        self.test_root_path = os.path.realpath(tempfile.mkdtemp())
         self.install_path = os.path.join(self.test_root_path, "install")
         os.makedirs(self.install_path)
         self.install_path2 = os.path.join(self.test_root_path, "install2")
@@ -263,7 +264,7 @@ class MockVcsConfigElement(wstool.config_elements.VCSConfigElement):
 class InstallTest(unittest.TestCase):
 
     def test_mock_install(self):
-        test_root = tempfile.mkdtemp()
+        test_root = os.path.realpath(tempfile.mkdtemp())
         try:
             git1 = PathSpec('foo', 'git', 'git/uri', 'git.version')
             svn1 = PathSpec('foos', 'svn', 'svn/uri', '12345')
@@ -286,7 +287,7 @@ class InstallTest(unittest.TestCase):
             shutil.rmtree(test_root)
 
     def test_mock_install_fail(self):
-        test_root = tempfile.mkdtemp()
+        test_root = os.path.realpath(tempfile.mkdtemp())
         try:
             # robust
             git1 = PathSpec('foo', 'git', 'git/uri', 'git.version')
@@ -395,7 +396,7 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
         self.assertEqual(result[3]['scm'], 'bzr')
 
     def test_unmanaged(self):
-        root_path = tempfile.mkdtemp()
+        root_path = os.path.realpath(tempfile.mkdtemp())
         ws_path = os.path.join(root_path, "ws")
         os.makedirs(ws_path)
 
@@ -435,7 +436,7 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
         self.assertEqual(len(result), 3)
 
     def test_info_real_path(self):
-        root_path = tempfile.mkdtemp()
+        root_path = os.path.realpath(tempfile.mkdtemp())
         el_path = os.path.join(root_path, "ros")
         os.makedirs(el_path)
         try:
@@ -475,7 +476,7 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
             shutil.rmtree(root_path)
 
     def test_get_status(self):
-        self.test_root_path = tempfile.mkdtemp()
+        self.test_root_path = os.path.realpath(tempfile.mkdtemp())
         try:
             basepath = '/foo/path'
             entry = {}
@@ -679,6 +680,24 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
                                          "--detached",
                                          '-y']))
 
+    def test_cmd_foreach(self):
+        self.local_path = os.path.join(self.test_root_path, 'foreach')
+        cli = MultiprojectCLI(progname='multi_cli', config_filename='.rosinstall')
+        cli.cmd_init([self.local_path, self.simple_rosinstall])
+        # specified localname
+        sys.stdout = f = StringIO()
+        cli.cmd_foreach(self.local_path, argv=['gitrepo', 'pwd'])
+        sys.stdout = sys.__stdout__
+        repo_path = lambda localname: os.path.join(self.local_path, localname)
+        self.assertEqual('[gitrepo] %s' % repo_path('gitrepo'),
+                         f.getvalue().strip())
+        # --git option
+        sys.stdout = f = StringIO()
+        cli.cmd_foreach(self.local_path, argv=['--git', 'pwd'])
+        sys.stdout = sys.__stdout__
+        expected_output = '[ros] %s\n[gitrepo] %s' % (repo_path('ros'),
+                                                      repo_path('gitrepo'))
+        self.assertEqual(expected_output, f.getvalue().strip())
 
     def test_cmd_remove(self):
         # wstool to create dir
@@ -773,7 +792,7 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
         self.assertTrue(os.path.exists(os.path.join(self.local_path, 'hgrepo')))
 
     def test_export(self):
-        root_path = tempfile.mkdtemp()
+        root_path = os.path.realpath(tempfile.mkdtemp())
         el_path = os.path.join(root_path, "ros")
         os.makedirs(el_path)
         try:
