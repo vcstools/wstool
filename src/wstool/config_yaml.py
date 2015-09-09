@@ -183,9 +183,11 @@ class PathSpec:
                  scmtype=None,
                  uri=None,
                  version=None,
+                 curr_version=None,
                  tags=None,
                  revision=None,
                  currevision=None,
+                 remote_revision=None,
                  path=None,
                  curr_uri=None):
         """
@@ -194,6 +196,7 @@ class PathSpec:
         :param scmtype: one of __ALLTYPES__
         :param uri: uri from config file
         :param version: version label from config file (branchname, tagname, sha-id)
+        :param cur_version: version information label(s) from VCS (branchname, remote, tracking branch)
         :param tags: arbirtrary meta-information (used for ROS package indexing)
         :param revision: unique id of label stored in version
         :param currrevision: unique id of actual version in file system
@@ -205,10 +208,12 @@ class PathSpec:
         self._uri = uri
         self._curr_uri = curr_uri
         self._version = version
+        self._curr_version = curr_version
         self._scmtype = scmtype
         self._tags = tags or []
         self._revision = revision
         self._currevision = currevision
+        self._remote_revision = remote_revision
 
     def __str__(self):
         return str(self.get_legacy_yaml())
@@ -231,8 +236,10 @@ class PathSpec:
             self._scmtype = None
             self._uri = None
             self._version = None
+            self._curr_version = None
             self._revision = None
             self._currevision = None
+            self._remote_revision = None
 
     def get_legacy_type(self):
         """return one of __ALLTYPES__"""
@@ -286,11 +293,17 @@ class PathSpec:
     def get_version(self):
         return self._version
 
+    def get_curr_version(self):
+        return self._curr_version
+
     def get_revision(self):
         return self._revision
 
     def get_current_revision(self):
         return self._currevision
+
+    def get_remote_revision(self):
+        return self._remote_revision
 
     def get_uri(self):
         return self._uri
@@ -310,7 +323,7 @@ def get_path_spec_from_yaml(yaml_dict):
     tags = []
     if type(yaml_dict) != dict:
         raise MultiProjectException(
-            "Yaml for each element must be in YAML dict form")
+            "Yaml for each element must be in YAML dict form: %s " % yaml_dict)
     # old syntax:
 # - hg: {local-name: common_rosdeps,
 #        version: common_rosdeps-1.0.2,

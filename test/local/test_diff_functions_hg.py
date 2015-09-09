@@ -221,7 +221,7 @@ class WstoolInfoHgTest(AbstractSCMTest):
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'hg', self.version_end, os.path.join(self.test_root_path, 'remote')], tokens, output)
+        self.assertEqual(['clone', 'hg', 'default', '(-)', self.version_end, os.path.join(self.test_root_path, 'remote')], tokens)
 
         clone_path = os.path.join(self.local_path, "clone")
         # make local modifications check
@@ -231,7 +231,7 @@ class WstoolInfoHgTest(AbstractSCMTest):
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'M', 'hg', self.version_end, os.path.join(self.test_root_path, 'remote')], tokens)
+        self.assertEqual(['clone', 'M', 'hg', 'default', '(-)', self.version_end, os.path.join(self.test_root_path, 'remote')], tokens)
 
         subprocess.check_call(["rm", ".rosinstall"], cwd=self.local_path)
         _add_to_file(os.path.join(self.local_path, ".rosinstall"), "- other: {local-name: ../ros}\n- hg: {local-name: clone, uri: ../remote, version: \"footag\"}")
@@ -240,7 +240,7 @@ class WstoolInfoHgTest(AbstractSCMTest):
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'MV', 'hg', 'footag', self.version_end, "(%s)" % self.version_init, os.path.join(self.test_root_path, 'remote')], tokens)
+        self.assertEqual(['clone', 'MV', 'hg', 'default', '(footag)', self.version_end, "(%s)" % self.version_init, os.path.join(self.test_root_path, 'remote')], tokens)
 
         subprocess.check_call(["rm", "-rf", "clone"], cwd=self.local_path)
         os.chdir(self.test_root_path)
@@ -248,4 +248,4 @@ class WstoolInfoHgTest(AbstractSCMTest):
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'x', 'hg', 'footag', os.path.join(self.test_root_path, 'remote')], tokens)
+        self.assertEqual(['clone', 'x', 'hg', '(footag)', os.path.join(self.test_root_path, 'remote')], tokens)

@@ -424,7 +424,7 @@ def cmd_snapshot(config, localnames=None):
     return source_aggregate
 
 
-def cmd_info(config, localnames=None, untracked=False):
+def cmd_info(config, localnames=None, untracked=False, fetch=False):
     """This function compares what should be (config_file) with what is
     (directories) and returns a list of dictionary giving each local
     path and all the state information about it available.
@@ -435,9 +435,10 @@ def cmd_info(config, localnames=None, untracked=False):
         Auxilliary class to perform IO-bound operations in individual threads
         """
 
-        def __init__(self, element, path, untracked):
+        def __init__(self, element, path, untracked, fetch):
             self.element = element
             self.path = path
+            self.fetch = fetch
             self.untracked = untracked
 
         def do_work(self):
@@ -447,8 +448,11 @@ def cmd_info(config, localnames=None, untracked=False):
             curr_uri = None
             exists = False
             version = ""  # what is given in config file
+            curr_version_label = ""  # e.g. branchname
+            remote_revision = "" # UID on remote
+            display_version = ''
             modified = ""
-            actualversion = ""  # revision number of version
+            currevision = ""  # revision number of version
             specversion = ""  # actual revision number
             localname = self.element.get_local_name()
             path = self.element.get_path() or localname
@@ -463,8 +467,15 @@ def cmd_info(config, localnames=None, untracked=False):
                     path_spec = self.element.get_path_spec()
                     version = path_spec.get_version()
                 else:
-                    path_spec = self.element.get_versioned_path_spec()
+                    path_spec = self.element.get_versioned_path_spec(fetch=fetch)
                     version = path_spec.get_version()
+                    remote_revision = path_spec.get_remote_revision()
+                    curr_version_label = path_spec.get_curr_version()
+                    if (curr_version_label is not None and
+                        version != curr_version_label):
+                        display_version = curr_version_label
+                    else:
+                        display_version = version
                     curr_uri = path_spec.get_curr_uri()
                     status = self.element.get_status(self.path, self.untracked)
                     if (status is not None and
@@ -474,9 +485,8 @@ def cmd_info(config, localnames=None, untracked=False):
                     if (version is not None and
                         version.strip() != '' and
                         (specversion is None or specversion.strip() == '')):
-
                         specversion = '"%s"' % version
-                    actualversion = path_spec.get_current_revision()
+                    currevision = path_spec.get_current_revision()
                 scm = path_spec.get_scmtype()
                 uri = path_spec.get_uri()
             return {'scm': scm,
@@ -486,8 +496,10 @@ def cmd_info(config, localnames=None, untracked=False):
                     'uri': uri,
                     'curr_uri': curr_uri,
                     'version': version,
+                    'remote_revision': remote_revision,
+                    'curr_version_label': curr_version_label,
                     'specversion': specversion,
-                    'actualversion': actualversion,
+                    'actualversion': currevision,
                     'modified': modified,
                     'properties': self.element.get_properties()}
 
@@ -498,7 +510,7 @@ def cmd_info(config, localnames=None, untracked=False):
     work = DistributedWork(capacity=len(elements), num_threads=-1)
     for element in elements:
         if element.get_properties() is None or not 'setup-file' in element.get_properties():
-            work.add_thread(InfoRetriever(element, path, untracked))
+            work.add_thread(InfoRetriever(element, path, untracked, fetch))
     outputs = work.run()
 
     return outputs

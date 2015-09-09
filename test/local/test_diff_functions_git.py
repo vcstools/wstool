@@ -186,25 +186,26 @@ class WstoolInfoGitTest(AbstractSCMTest):
 
     def setUp(self):
         AbstractSCMTest.setUp(self)
-        remote_path = os.path.join(self.test_root_path, "remote")
-        os.makedirs(remote_path)
+        self.remote_path = os.path.join(self.test_root_path, "remote")
+        os.makedirs(self.remote_path)
 
         # create a "remote" repo
-        subprocess.check_call(["git", "init"], cwd=remote_path)
-        subprocess.check_call(["touch", "test.txt"], cwd=remote_path)
-        subprocess.check_call(["git", "add", "*"], cwd=remote_path)
-        subprocess.check_call(["git", "commit", "-m", "modified"], cwd=remote_path)
-        po = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:\"%H\""], cwd=remote_path, stdout=subprocess.PIPE)
+        subprocess.check_call(["git", "init"], cwd=self.remote_path)
+        subprocess.check_call(["touch", "test.txt"], cwd=self.remote_path)
+        subprocess.check_call(["git", "add", "*"], cwd=self.remote_path)
+        subprocess.check_call(["git", "commit", "-m", "modified"], cwd=self.remote_path)
+        po = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:\"%H\""], cwd=self.remote_path, stdout=subprocess.PIPE)
         self.version_init = po.stdout.read().decode('UTF-8').rstrip('"').lstrip('"')[0:12]
-        subprocess.check_call(["git", "tag", "footag"], cwd=remote_path)
-        subprocess.check_call(["touch", "test2.txt"], cwd=remote_path)
-        subprocess.check_call(["git", "add", "*"], cwd=remote_path)
-        subprocess.check_call(["git", "commit", "-m", "modified"], cwd=remote_path)
-        po = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:\"%H\""], cwd=remote_path, stdout=subprocess.PIPE)
+        subprocess.check_call(["git", "tag", "footag"], cwd=self.remote_path)
+        subprocess.check_call(["touch", "test2.txt"], cwd=self.remote_path)
+        subprocess.check_call(["git", "add", "*"], cwd=self.remote_path)
+        subprocess.check_call(["git", "commit", "-m", "modified"], cwd=self.remote_path)
+        po = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:\"%H\""], cwd=self.remote_path, stdout=subprocess.PIPE)
         self.version_end = po.stdout.read().decode('UTF-8').rstrip('"').lstrip('"')[0:12]
 
         # wstool the remote repo and fake ros
         _add_to_file(os.path.join(self.local_path, ".rosinstall"), "- other: {local-name: ../ros}\n- git: {local-name: clone, uri: ../remote}")
+        self.clone_path = os.path.join(self.local_path, "clone")
 
         cmd = ["wstool", "update"]
         os.chdir(self.local_path)
@@ -214,30 +215,81 @@ class WstoolInfoGitTest(AbstractSCMTest):
         sys.stdout = sys.__stdout__
 
     def test_wstool_detailed_localpath_info(self):
-        cmd = ["wstool", "info", "-t", "ws"]
+        cmd = ["wstool", "info", "-t", "ws", "--managed-only"]
         os.chdir(self.test_root_path)
         sys.stdout = output = StringIO()
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'git', self.version_end, os.path.join(self.test_root_path, 'remote')], tokens, output)
+        self.assertEqual(['clone', 'git', 'master', '(-)', self.version_end, self.remote_path], tokens)
 
-        clone_path = os.path.join(self.local_path, "clone")
-        # make local modifications check
-        subprocess.check_call(["rm", "test2.txt"], cwd=clone_path)
+        # test when remote version is different
+        subprocess.check_call(["git", "reset", "--hard", "HEAD~1"], cwd=self.clone_path)
         sys.stdout = output = StringIO()
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'M', 'git', self.version_end, os.path.join(self.test_root_path, 'remote')], tokens)
+        self.assertEqual(['clone', 'C', 'git', 'master', '(-)', self.version_init, self.remote_path], tokens)
+        # return branch back to original revision
+        subprocess.check_call(["git", "reset", "--hard", self.version_end], cwd=self.clone_path)
+
+        # make local modifications check
+        subprocess.check_call(["rm", "test2.txt"], cwd=self.clone_path)
+        sys.stdout = output = StringIO()
+        wstool_main(cmd)
+        output = output.getvalue()
+        tokens = _nth_line_split(-2, output)
+        self.assertEqual(['clone', 'M', 'git', 'master', '(-)', self.version_end, self.remote_path], tokens)
 
         subprocess.check_call(["rm", ".rosinstall"], cwd=self.local_path)
         _add_to_file(os.path.join(self.local_path, ".rosinstall"), "- other: {local-name: ../ros}\n- git: {local-name: clone, uri: ../remote, version: \"footag\"}")
+        # test when version is different
         sys.stdout = output = StringIO()
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'MV', 'git', 'footag', self.version_end, "(%s)" % self.version_init, os.path.join(self.test_root_path, 'remote')], tokens)
+        self.assertEqual(['clone', 'MV', 'git', 'master', '(footag)', self.version_end, "(%s)" % self.version_init, self.remote_path], tokens)
+        # test when tracking branch is different from current branch
+        subprocess.check_call(["git", "checkout", "-b", "test_branch"], cwd=self.clone_path)
+        subprocess.check_call(["git", "config", "--replace-all", "branch.test_branch.remote", "origin"], cwd=self.clone_path)
+        subprocess.check_call(["git", "config", "--replace-all", "branch.test_branch.merge", "master"], cwd=self.clone_path)
+        sys.stdout = output = StringIO()
+        wstool_main(cmd)
+        output = output.getvalue()
+        tokens = _nth_line_split(-2, output)
+        self.assertEqual(['clone', 'MV', 'git', 'test_branch', '<', 'master', '(footag)', self.version_end, "(%s)" % self.version_init, self.remote_path], tokens)
+
+        # test when remote is different from origin by rename
+        subprocess.check_call(["git", "remote", "rename", "origin", "remote2"], cwd=self.clone_path)
+        subprocess.check_call(["git", "config", "--replace-all", "branch.test_branch.remote", "remote2"], cwd=self.clone_path)
+        sys.stdout = output = StringIO()
+        wstool_main(cmd)
+        output = output.getvalue()
+        tokens = _nth_line_split(-2, output)
+        self.assertEqual(['clone', 'MV', 'git', 'test_branch', '<', 'remote2/master', '(footag)', self.version_end, "(%s)" % self.version_init, "(%s)" % self.remote_path], tokens)
+        # return remote name to origin
+        subprocess.check_call(["git", "remote", "rename", "remote2", "origin"], cwd=self.clone_path)
+
+        # test when remote is different from origin, no fetch
+        subprocess.check_call(["git", "remote", "add", "remote2", "../../remote"], cwd=self.clone_path)
+        subprocess.check_call(["git", "config", "--replace-all", "branch.test_branch.remote", "remote2"], cwd=self.clone_path)
+        sys.stdout = output = StringIO()
+        wstool_main(cmd)
+        output = output.getvalue()
+        tokens = _nth_line_split(-2, output)
+        self.assertEqual(['clone', 'MV', 'git', 'test_branch', '(footag)', self.version_end, "(%s)" % self.version_init, self.remote_path], tokens)
+
+
+        # test when remote is different from origin, with fetch
+        sys.stdout = output = StringIO()
+        wstool_main(cmd + ['--fetch'])
+        output = output.getvalue()
+        tokens = _nth_line_split(-2, output)
+        self.assertEqual(['clone', 'MV', 'git', 'test_branch', '<', 'remote2/master', '(footag)', self.version_end, "(%s)" % self.version_init, self.remote_path], tokens)
+
+
+        # return branch back to master
+        subprocess.check_call(["git", "checkout", "master"], cwd=self.clone_path)
 
         # using a denormalized local-name here
         subprocess.check_call(["rm", ".rosinstall"], cwd=self.local_path)
@@ -246,17 +298,17 @@ class WstoolInfoGitTest(AbstractSCMTest):
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'MV', 'git', 'footag', self.version_end, "(%s)" %
-                         self.version_init, os.path.join(self.test_root_path, 'remote')], tokens)
+        self.assertEqual(['clone', 'MV', 'git', 'master', '(footag)', self.version_end, "(%s)" %
+                         self.version_init, self.remote_path], tokens)
 
         # using an absolute path to clone dir here
         subprocess.check_call(["rm", ".rosinstall"], cwd=self.local_path)
-        _add_to_file(os.path.join(self.local_path, ".rosinstall"), "- other: {local-name: ../ros}\n- git: {local-name: '"+clone_path+"', uri: ../remote, version: \"footag\"}")
+        _add_to_file(os.path.join(self.local_path, ".rosinstall"), "- other: {local-name: ../ros}\n- git: {local-name: '"+self.clone_path+"', uri: ../remote, version: \"footag\"}")
         sys.stdout = output = StringIO()
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual([clone_path, 'MV', 'git', 'footag', self.version_end, "(%s)" % self.version_init, os.path.join(self.test_root_path, 'remote')], tokens)
+        self.assertEqual([self.clone_path, 'MV', 'git', 'master', '(footag)', self.version_end, "(%s)" % self.version_init, self.remote_path], tokens)
 
         # using an absolute path here where relative path is shorter to display (also checks x for missing)
         subprocess.check_call(["rm", ".rosinstall"], cwd=self.local_path)
@@ -265,3 +317,5 @@ class WstoolInfoGitTest(AbstractSCMTest):
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
+        localname = os.path.join(os.path.dirname(self.local_path), 'foo')
+        self.assertEqual([localname, 'x', 'git', '(footag)', self.remote_path], tokens)

@@ -140,6 +140,7 @@ class ConfigElement(object):
     def get_status(self, basepath=None, untracked=False):
         raise NotImplementedError("ConfigElement get_status unimplemented")
 
+
     def backup(self, backup_path):
         if not backup_path:
             raise MultiProjectException(
@@ -397,7 +398,7 @@ class VCSConfigElement(ConfigElement):
                         version=version,
                         tags=self.get_properties())
 
-    def get_versioned_path_spec(self):
+    def get_versioned_path_spec(self, fetch=False):
         "yaml looking up current version"
         version = self.version
         if version == '':
@@ -410,6 +411,8 @@ class VCSConfigElement(ConfigElement):
                 sys.stderr.write("Warning: version '%s' not found for '%s'\n"
                                   % (self.version, self.local_name))
         currevision = self._get_vcsc().get_version()
+        remote_revision = self._get_vcsc().get_remote_version(fetch=fetch)
+        curr_version = self._get_vcsc().get_current_version_label()
         uri = self.uri
         curr_uri = self._get_vcsc().get_url()
         # uri might be a shorthand notation equivalent to curr_uri
@@ -420,8 +423,10 @@ class VCSConfigElement(ConfigElement):
                         scmtype=self.get_vcs_type_name(),
                         uri=self.uri,
                         version=version,
+                        curr_version=curr_version,
                         revision=revision,
                         currevision=currevision,
+                        remote_revision=remote_revision,
                         curr_uri=curr_uri,
                         tags=self.get_properties())
 

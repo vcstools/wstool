@@ -47,7 +47,8 @@ class MockVcsClient():
                  vcs_presence=False,
                  url="mockurl",
                  actualversion=None,
-                 specversion=None):
+                 specversion=None,
+                 remoteversion=None):
         self.scmtype = scmtype
         self.path_exists_flag = path_exists
         self.checkout_success = checkout_success
@@ -58,6 +59,7 @@ class MockVcsClient():
         self.updated = False
         self.actualversion = actualversion
         self.specversion = specversion
+        self.remoteversion = remoteversion
 
     def get_vcs_type_name(self):
         return self.scmtype
@@ -70,6 +72,12 @@ class MockVcsClient():
             return self.actualversion
         else:
             return self.specversion
+
+    def get_remote_version(self, fetch=False):
+        return self.remoteversion
+
+    def get_current_version_label(self):
+        return self.scmtype + "mockcurrentversionlabel"
 
     def get_status(self, basepath=None, untracked=False):
         return self.scmtype + " mockstatus%s,%s" % (basepath, untracked)

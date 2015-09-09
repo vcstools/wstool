@@ -115,7 +115,9 @@ Index: clone/modified.txt
 @@ -0,0 +1 @@
 +foo"""]
         for snippet in expected:
-            self.assertTrue(snippet in output, output)
+            for line in snippet.splitlines():
+                # assertIn is not supported in Python2.6
+                self.assertTrue(line in output, output)
 
     def test_wstool_diff_svn_outside(self):
         """Test diff output for svn when run outside workspace"""
@@ -261,7 +263,7 @@ class WstoolInfoSvnTest(AbstractSCMTest):
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'MV', 'svn', '1', self.version_end, "(%s)" % self.version_init, self.svn_uri], tokens)
+        self.assertEqual(['clone', 'MV', 'svn', '1', '(-)', self.version_end, "(%s)" % self.version_init, self.svn_uri], tokens)
 
         subprocess.check_call(["rm", "-rf", "clone"], cwd=self.local_path)
         os.chdir(self.test_root_path)
@@ -269,4 +271,4 @@ class WstoolInfoSvnTest(AbstractSCMTest):
         wstool_main(cmd)
         output = output.getvalue()
         tokens = _nth_line_split(-2, output)
-        self.assertEqual(['clone', 'x', 'svn', '1', self.svn_uri], tokens)
+        self.assertEqual(['clone', 'x', 'svn', '(-)', self.svn_uri], tokens)
