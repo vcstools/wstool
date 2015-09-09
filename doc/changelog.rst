@@ -1,3 +1,15 @@
+0.1.7
+-----
+
+- Added installation of generated man pages.
+- Added installation of shell completion for wstool.
+- Improved output of wstool info with the new get_current_version_label in vcstools.
+- Added a foreach command.
+- Added a ``--root`` option to wstool info.
+- Enhanced the ``--update`` option for wstool set.
+- Now uses multiple threads for network operations by default.
+- Some other minor fixes and improvements and docs.
+
 0.1.5
 -----
 
