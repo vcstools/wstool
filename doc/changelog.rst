@@ -1,3 +1,8 @@
+0.1.8
+-----
+
+- Fix for installation issue.
+
 0.1.7
 -----
 
