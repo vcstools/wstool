@@ -1,1 +1,2 @@
 recursive-include completion *
+recursive-include doc *
