@@ -1,3 +1,9 @@
+0.1.9
+-----
+
+- Fix for zsh completion.
+- Fixed version dependency on vcstools for debian.
+
 0.1.8
 -----
 
