@@ -47,7 +47,8 @@ def get_data_files(prefix):
     data_files.append((bash_comp_dest, ['completion/wstool-completion.bash']))
     zsh_comp_dest = os.path.join(_resolve_prefix(prefix, 'zsh_comp'),
                                  'share/zsh/site-functions')
-    data_files.append((zsh_comp_dest, ['completion/_wstool']))
+    data_files.append((zsh_comp_dest, ['completion/_wstool',
+                                       'completion/wstool-completion.bash']))
     return data_files
 
 
