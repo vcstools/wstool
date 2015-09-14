@@ -1,3 +1,9 @@
+0.1.10
+------
+
+- Fix regression which broke the -j option.
+- Enable pretty printing of the ``.rosinstall`` file's YAML.
+
 0.1.9
 -----
 
