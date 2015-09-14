@@ -377,7 +377,8 @@ def get_path_spec_from_yaml(yaml_dict):
                     tags=tags)
 
 
-def generate_config_yaml(config, filename, header):
+def generate_config_yaml(config, filename, header, pretty=False,
+                         sort_with_localname=False):
     """
     Writes file filename with header first and then the config as yaml
     """
@@ -386,7 +387,19 @@ def generate_config_yaml(config, filename, header):
     with open(os.path.join(config.get_base_path(), filename), 'w+b') as f:
         if header is not None:
             f.write(header.encode('UTF-8'))
-        items = [x.get_legacy_yaml() for x in config.get_source()]
-        if items:
+        if sort_with_localname:
+            items = [x.get_legacy_yaml() for x in
+                        sorted(config.get_source(),
+                               key=lambda x:x.get_local_name())]
+        else:
+            items = [x.get_legacy_yaml() for x in config.get_source()]
+
+        if not items:
+            return
+
+        if pretty:
+            content = yaml.safe_dump(items, allow_unicode=True,
+                                     default_flow_style=False)
+        else:
             content = yaml.safe_dump(items)
-            f.write(content.encode('UTF-8'))
+        f.write(content.encode('UTF-8'))

@@ -203,6 +203,40 @@ class ConfigFile_Test(unittest.TestCase):
         self.assertEqual("# Hello", lines[0])
         self.assertEqual("- svn: {local-name: ros, uri: %s/some/uri}" % self.directory, lines[1])
 
+    def test_generate_with_pretty_format(self):
+        self.directory = tempfile.mkdtemp()
+        config = wstool.config.Config([PathSpec('ros', 'svn', 'some/uri')],
+                                      self.directory)
+        wstool.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n",
+                                                pretty=True)
+        filepath = os.path.join(self.directory, 'foo')
+        self.assertTrue(os.path.exists(filepath))
+        with open(filepath, 'r') as f:
+            read_data = f.read()
+        self.assertEqual("""\
+# Hello
+- svn:
+    local-name: ros
+    uri: %s/some/uri
+""" % self.directory, read_data)
+
+    def test_generate_sorted_with_localname(self):
+        self.directory = tempfile.mkdtemp()
+        elements = [PathSpec('ros', 'svn', 'some/uri1'),
+                    PathSpec('git', 'git', 'some/uri2')]
+        config = wstool.config.Config(elements, self.directory)
+        wstool.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n",
+                                                sort_with_localname=True)
+        filepath = os.path.join(self.directory, 'foo')
+        self.assertTrue(os.path.exists(filepath))
+        with open(filepath, 'r') as f:
+            read_data = f.read()
+        self.assertEqual("""\
+# Hello
+- git: {local-name: git, uri: %s/some/uri2}
+- svn: {local-name: ros, uri: %s/some/uri1}
+""" % (self.directory, self.directory), read_data)
+
     def tearDown(self):
         if os.path.exists(self.directory):
             shutil.rmtree(self.directory)

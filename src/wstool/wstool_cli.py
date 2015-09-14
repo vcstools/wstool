@@ -67,11 +67,20 @@ _PROGNAME = 'wstool'
 class WstoolCLI(MultiprojectCLI):
 
     def __init__(self, config_filename=ROSINSTALL_FILENAME, progname=_PROGNAME):
+
+        def config_generator(config, filename, header=None):
+            wstool.multiproject_cmd.cmd_persist_config(
+                config,
+                filename,
+                header,
+                pretty=True,
+                sort_with_localname=True)
+
         MultiprojectCLI.__init__(
             self,
             progname=progname,
             config_filename=config_filename,
-            config_generator=wstool.multiproject_cmd.cmd_persist_config)
+            config_generator=config_generator)
 
 
 def wstool_main(argv=None, usage=None):
