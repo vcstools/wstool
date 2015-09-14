@@ -187,6 +187,16 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(thing.done, True, result)
         self.assertEqual(False, 'error' in result[0], result)
 
+    def test_distributed_work_init(self):
+        work = DistributedWork(capacity=200)
+        self.assertEqual(10, work.num_threads)
+        work = DistributedWork(capacity=3, num_threads=5)
+        self.assertEqual(3, work.num_threads)
+        work = DistributedWork(capacity=5, num_threads=3)
+        self.assertEqual(3, work.num_threads)
+        work = DistributedWork(capacity=3, num_threads=-1)
+        self.assertEqual(3, work.num_threads)
+
     def test_distributed_work(self):
         work = DistributedWork(3)
 
