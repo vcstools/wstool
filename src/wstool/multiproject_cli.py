@@ -787,9 +787,9 @@ $ %(progname)s set robot_model --hg https://kforge.ros.org/robotmodel/robot_mode
 $ %(progname)s set robot_model --version-new robot_model-1.7.1
 %(detached)s
 """ % { 'progname': self.progname,
-        'detached': '$ %s set robot_model --detached' % self.progname
-        if self.allow_other_element
-        else ''},
+        'detached': '$ %s set robot_model --detached' % (self.progname
+                                                         if self.allow_other_element
+                                                         else '')},
             epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
         if self.allow_other_element:
             parser.add_option("--detached", dest="detach", default=False,
