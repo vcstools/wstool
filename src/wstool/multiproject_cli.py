@@ -627,7 +627,12 @@ $ roslocate info robot_model | %(prog)s merge -
         parser = OptionParser(
             usage=('usage: %s foreach [[localname]* | [VCSFILTER]*]'
                    ' [command] [OPTIONS]' % self.progname),
-            description=__MULTIPRO_CMD_DICT__['foreach'],
+            formatter=IndentedHelpFormatterWithNL(),
+            description=__MULTIPRO_CMD_DICT__['foreach'] + """.
+
+Example:
+$ %(progname)s foreach --git 'git status'
+""" % { 'progname': self.progname},
             epilog='See: http://www.ros.org/wiki/rosinstall for details')
         parser.add_option('--shell', default=False,
                           help='use the shell as the program to execute',
