@@ -62,7 +62,9 @@ __MULTIPRO_CMD_DICT__ = {
     "snapshot": "write a file specifying repositories to have the version they currently have",
     "diff":     "print a diff over some SCM controlled entries",
     "foreach":  "run shell command in given entries",
-    "status":   "print the change status of files in some SCM controlled entries"}
+    "status":   "print the change status of files in some SCM controlled entries",
+    "scrape":   "interactively add all found unmanaged VCS subfolders to workspace"
+}
 
 # usage help ordering and sections
 __MULTIPRO_CMD_HELP_LIST__ = ['help', 'init',
@@ -1214,5 +1216,43 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
                                    unmanaged=True)
             if table2 is not None and table2 != '':
                 print("\nAlso detected these repositories in the workspace, add using '%s set':\n\n%s" % (self.progname, table2))
+
+        return 0
+
+    def cmd_scrape(self, target_path, argv, config=None):
+        """
+        command for adding yet unamanaged repos under workspace root to managed repos.
+        :param target_path: where to look for config
+        :param config: config to use instead of parsing file anew
+        """
+        usage = ("usage: %s scrape [OPTIONS]" % self.progname)
+        parser = OptionParser(
+            usage=usage,
+            description=__MULTIPRO_CMD_DICT__["scrape"],
+            epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
+        parser.add_option("-y", "--confirm", dest="confirm", default='',
+                          help="Do not ask for confirmation",
+                          action="store_true")
+        (options, args) = parser.parse_args(argv)
+
+        if config is None:
+            config = multiproject_cmd.get_config(
+                target_path,
+                additional_uris=[],
+                config_filename=self.config_filename)
+        elif config.get_base_path() != target_path:
+            raise MultiProjectException(
+                "Config path does not match %s %s " % (config.get_base_path(),
+                                                       target_path))
+
+        elems = multiproject_cmd.cmd_find_unmanaged_repos(config)
+        if not elems:
+            raise MultiProjectException(
+                "No unmanaged repos found below '%s'" % (config.get_base_path()))
+        for elem in elems:
+            args = [elem['localname'], elem['scm'], elem['uri']]
+            if (options.confirm):
+                args.append('-y')
+            self.cmd_set(target_path, args)
 
         return 0

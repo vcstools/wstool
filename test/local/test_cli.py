@@ -37,6 +37,7 @@ import copy
 import tempfile
 import unittest
 import shutil
+import subprocess
 
 from mock import Mock
 
@@ -312,7 +313,6 @@ class InstallTest(unittest.TestCase):
                 pass
         finally:
             shutil.rmtree(test_root)
-
 
 class GetStatusDiffInfoCmdTest(unittest.TestCase):
 
@@ -615,7 +615,6 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
         for x in ['somepath', 'somelocalname', 'someactualversion', 'somespecversion', 'someversion', 'somecurr_uri', 'someuri', 'somescm']:
             self.assertTrue(x in result)
 
-
 class MultiprojectCLITest(AbstractFakeRosBasedTest):
 
     def test_cmd_init(self):
@@ -842,3 +841,30 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
             self.assertEqual('version', result[0]['git']['version'])
         finally:
             shutil.rmtree(root_path)
+
+    def test_scrape(self):
+        self.local_path = os.path.join(self.test_root_path, "ws37")
+        cli = MultiprojectCLI(progname='multi_cli', config_filename='.rosinstall')
+        self.assertEqual(0, cli.cmd_init([self.local_path, self.simple_rosinstall, "--parallel=5"]))
+        config = wstool.multiproject_cmd.get_config(basepath=self.local_path,
+                                                    config_filename='.rosinstall')
+        try:
+            cli.cmd_scrape(self.local_path, [], config)
+            self.fail("expected Exception")
+        except MultiProjectException:
+            pass
+        git_repo_path = os.path.join(self.local_path, 'gitrepo')
+        hg_repo_path = os.path.join(self.local_path, 'hgrepo')
+        subprocess.check_call(["git", "init", git_repo_path])
+        subprocess.check_call(["hg", "init", hg_repo_path])
+        for cmd in [["touch", "foo.txt"],
+                    ["hg", "add", hg_repo_path],
+                    ["hg", "commit", "-m", "foo"]]:
+            subprocess.check_call(cmd, cwd=hg_repo_path)
+        self.assertEqual(0, cli.cmd_scrape(self.local_path,
+                                           ['-y'],
+                                           config))
+        config = wstool.multiproject_cmd.get_config(basepath=self.local_path,
+                                                        config_filename='.rosinstall')
+        # initial config has 1 element, "ros"
+        self.assertEqual(len(config.get_config_elements()), 3, config.get_config_elements())

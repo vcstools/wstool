@@ -172,7 +172,7 @@ def _get_status_flags(basepath, elt_dict):
     return mflag
 
 
-def get_info_table_elements(basepath, entries):
+def get_info_table_elements(basepath, entries, unmanaged=False):
     """returns a list of dict with refined information from entries"""
 
     outputs = []
@@ -236,7 +236,7 @@ def get_info_table_elements(basepath, entries):
                 output_dict['matching'] = line['actualversion']
 
             common_prefixes = ["https://", "http://"]
-            if line['uri'] is not None:
+            if line['uri'] is not None and unmanaged is False:
                 for pre in common_prefixes:
                     if line['uri'].startswith(pre):
                         line['uri'] = line['uri'][len(pre):]
@@ -291,7 +291,8 @@ def get_info_table(basepath, entries, data_only=False, reverse=False, unmanaged=
 
     outputs = get_info_table_elements(
         basepath=basepath,
-        entries=entries)
+        entries=entries,
+        unmanaged=unmanaged)
 
     # adjust column width
     column_length = {}
