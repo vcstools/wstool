@@ -158,6 +158,9 @@ class ConfigElement(object):
     def __str__(self):
         return str(self.get_path_spec().get_legacy_yaml())
 
+    def __repr__(self):
+        return str(self.get_path_spec().get_legacy_yaml())
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.get_path_spec() == other.get_path_spec()
