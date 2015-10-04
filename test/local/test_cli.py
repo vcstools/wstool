@@ -503,6 +503,16 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
             self.assertEqual('', wstool.cli_common._get_status_flags(basepath, entry))
             entry = {'actualversion': 'foo', 'specversion': 'bar', 'modified': True}
             self.assertEqual('MV', wstool.cli_common._get_status_flags(basepath, entry))
+            entry = {'version': 'foo', 'default_remote_label': 'bar'}
+            self.assertEqual('', wstool.cli_common._get_status_flags(basepath, entry))
+            entry = {'version': None, 'default_remote_label': 'bar', 'curr_version': 'bar'}
+            self.assertEqual('', wstool.cli_common._get_status_flags(basepath, entry))
+            entry = {'version': None, 'default_remote_label': 'bar', 'curr_version': 'foo'}
+            self.assertEqual('C', wstool.cli_common._get_status_flags(basepath, entry))
+            entry = {'remote_revision': 'a1b2c3d4', 'actualversion': 'a1b2c3d4'}
+            self.assertEqual('', wstool.cli_common._get_status_flags(basepath, entry))
+            entry = {'remote_revision': 'a1b2c3d4', 'actualversion': '999999'}
+            self.assertEqual('C', wstool.cli_common._get_status_flags(basepath, entry))
         finally:
             shutil.rmtree(self.test_root_path)
 
@@ -595,6 +605,22 @@ class GetStatusDiffInfoCmdTest(unittest.TestCase):
         entries = [{'scm': 'scm',
                     'uri': 'uri',
                     'curr_uri': 'uri',
+                    'localname': 'localname',
+                    'actualversion': 'actualversion',
+                    'default_remote_label': 'default_remote_label',
+                    'curr_version': 'curr_version'}]
+        self.assertEqual(["localname", "C", "scm", "curr_version", "(default_remote_label)", "actualversion", "uri"], _nth_line_split(-1, wstool.cli_common.get_info_table(basepath, entries)))
+        entries = [{'scm': 'scm',
+                    'uri': 'uri',
+                    'curr_uri': 'uri',
+                    'localname': 'localname',
+                    'actualversion': 'actualversion',
+                    'default_remote_label': 'curr_version',
+                    'curr_version': 'curr_version'}]
+        self.assertEqual(["localname", "scm", "curr_version", "(=)", "actualversion", "uri"], _nth_line_split(-1, wstool.cli_common.get_info_table(basepath, entries)))
+        entries = [{'scm': 'scm',
+                    'uri': 'uri',
+                    'curr_uri': 'uri',
                     'version': 'version',
                     'localname': 'localname',
                     'specversion': 'specversion',
@@ -653,7 +679,18 @@ class MultiprojectCLITest(AbstractFakeRosBasedTest):
         self.local_path = os.path.join(self.test_root_path, "ws_test_cmd_info")
         cli = MultiprojectCLI(progname='multi_cli',
                               config_filename='.rosinstall')
+        self.assertEqual(0, cli.cmd_info(self.local_path, []))
         self.assertEqual(0, cli.cmd_info(self.local_path, ['--root']))
+        self.assertEqual(0, cli.cmd_info(self.local_path, ['--yaml']))
+        self.assertEqual(0, cli.cmd_info(self.local_path, ['--untracked']))
+        self.assertEqual(0, cli.cmd_init([self.local_path, self.simple_rosinstall, "--parallel=5"]))
+        self.assertEqual(0, cli.cmd_merge(self.local_path, [self.simple_changed_vcs_rosinstall, "-y"]))
+        self.assertEqual(0, cli.cmd_info(self.local_path, []))
+        self.assertEqual(0, cli.cmd_info(self.local_path, ['gitrepo']))
+        self.assertEqual(0, cli.cmd_info(self.local_path, ['hgrepo']))
+        self.assertEqual(0, cli.cmd_info(self.local_path, ['--fetch']))
+        self.assertEqual(0, cli.cmd_info(self.local_path, ['gitrepo', '--fetch']))
+        self.assertEqual(0, cli.cmd_info(self.local_path, ['hgrepo', '--fetch']))
 
     def test_cmd_set(self):
         self.local_path = os.path.join(self.test_root_path, "ws31b")

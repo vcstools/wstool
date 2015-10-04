@@ -162,12 +162,18 @@ def _get_status_flags(basepath, elt_dict):
          elt_dict['actualversion'] is not None and
          elt_dict['specversion'] != elt_dict['actualversion'])):
         mflag += 'V'
-    if ('remote_revision' in elt_dict and
-        elt_dict['remote_revision'] != '' and
-        elt_dict['remote_revision'] is not None and
-        elt_dict['actualversion'] is not None and
-        'actualversion' in elt_dict and
-        elt_dict['remote_revision'] != elt_dict['actualversion']):
+    if (('remote_revision' in elt_dict and
+         elt_dict['remote_revision'] != '' and
+         elt_dict['remote_revision'] is not None and
+         elt_dict['actualversion'] is not None and
+         'actualversion' in elt_dict and
+         elt_dict['remote_revision'] != elt_dict['actualversion']) or
+        (('version' not in elt_dict or
+          elt_dict['version'] is None) and
+         'default_remote_label' in elt_dict and
+         elt_dict['default_remote_label'] is not None and
+         ('curr_version' not in elt_dict or
+          elt_dict['curr_version'] != elt_dict['default_remote_label']))):
         mflag += 'C'
     return mflag
 
@@ -225,8 +231,17 @@ def get_info_table_elements(basepath, entries):
             if line['curr_version'] is not None:
                 output_dict['version'] = line['curr_version']
             if output_dict['version'] is not None:
-                if (line['version'] != output_dict['version']):
-                    output_dict['version'] += "  (%s)" % (line['version'] or '-')
+                if line['version'] != output_dict['version']:
+                    if line['version']:
+                        output_dict['version'] += "  (%s)" % line['version']
+                    else:
+                        if line['default_remote_label']:
+                            if output_dict['version'] == line['default_remote_label']:
+                                output_dict['version'] += "  (=)"
+                            else:
+                                output_dict['version'] += "  (%s)" % line['default_remote_label']
+                        else:
+                            output_dict['version'] += "  (-)"
 
             if (line['specversion'] is not None and
                 line['specversion'] != '' and
