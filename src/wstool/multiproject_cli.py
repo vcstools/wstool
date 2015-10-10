@@ -579,7 +579,7 @@ $ roslocate info robot_model | %(prog)s merge -
         if newconfig is not None:
             print("Config changed, maybe you need run %s update to update SCM entries." % self.progname)
             print("Overwriting %s" % os.path.join(newconfig.get_base_path(), self.config_filename))
-            shutil.move(os.path.join(newconfig.get_base_path(), self.config_filename), "%s.bak" % os.path.join(newconfig.get_base_path(), self.config_filename))
+            shutil.copy(os.path.join(newconfig.get_base_path(), self.config_filename), "%s.bak" % os.path.join(newconfig.get_base_path(), self.config_filename))
             self.config_generator(newconfig, self.config_filename, get_header(self.progname))
             print("\nupdate complete.")
         else:
@@ -945,7 +945,7 @@ $ %(progname)s set robot_model --version-new robot_model-1.7.1
         if newconfig is not None:
             print("Overwriting %s" % os.path.join(
                 newconfig.get_base_path(), self.config_filename))
-            shutil.move(
+            shutil.copy(
                 os.path.join(newconfig.get_base_path(), self.config_filename),
                 "%s.bak" % os.path.join(newconfig.get_base_path(), self.config_filename))
             self.config_generator(newconfig, self.config_filename)
@@ -1079,7 +1079,7 @@ The command removes entries from your configuration file, it does not affect you
         if success:
             print("Overwriting %s" % os.path.join(config.get_base_path(),
                                                   self.config_filename))
-            shutil.move(os.path.join(config.get_base_path(),
+            shutil.copy(os.path.join(config.get_base_path(),
                                      self.config_filename),
                         "%s.bak" % os.path.join(config.get_base_path(),
                                                 self.config_filename))

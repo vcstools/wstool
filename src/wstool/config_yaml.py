@@ -384,7 +384,8 @@ def generate_config_yaml(config, filename, header, pretty=False,
     """
     if not os.path.exists(config.get_base_path()):
         os.makedirs(config.get_base_path())
-    with open(os.path.join(config.get_base_path(), filename), 'w+b') as f:
+    config_filepath = os.path.realpath(os.path.join(config.get_base_path(), filename))
+    with open(config_filepath, 'w+b') as f:
         if header is not None:
             f.write(header.encode('UTF-8'))
         if sort_with_localname:
