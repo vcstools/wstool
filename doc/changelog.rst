@@ -1,3 +1,12 @@
+0.1.11
+------
+
+- Changed the way ``.bak`` files are created when overwriting existing configurations.
+- Added the Scrape command.
+- Added default git branch and status to ``wstool fetch --info``.
+- Added versioned dependency on vcstools ``0.1.38`` to make use of new API features.
+
+
 0.1.10
 ------
 
