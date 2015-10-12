@@ -68,7 +68,7 @@ __MULTIPRO_CMD_DICT__ = {
 
 # usage help ordering and sections
 __MULTIPRO_CMD_HELP_LIST__ = ['help', 'init',
-                              None, 'set', 'merge', 'remove',
+                              None, 'set', 'merge', 'remove', 'scrape',
                               None, 'update',
                               None, 'info', 'status', 'diff', 'foreach']
 
@@ -1220,7 +1220,7 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
                                    reverse=reverse,
                                    unmanaged=True)
             if table2 is not None and table2 != '':
-                print("\nAlso detected these repositories in the workspace, add using '%s set':\n\n%s" % (self.progname, table2))
+                print("\nAlso detected these repositories in the workspace, add using '%s scrape' or '%s set':\n\n%s" % (self.progname, self.progname, table2))
 
         return 0
 
@@ -1255,9 +1255,10 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
             raise MultiProjectException(
                 "No unmanaged repos found below '%s'" % (config.get_base_path()))
         for elem in elems:
-            args = [elem['localname'], elem['scm'], elem['uri']]
-            if (options.confirm):
-                args.append('-y')
-            self.cmd_set(target_path, args)
-
+            elem_abs_path = os.path.join(config.get_base_path(), elem['localname'])
+            if os.path.isdir(elem_abs_path):
+                args = [elem_abs_path, elem['scm'], elem['uri']]
+                if (options.confirm):
+                    args.append('-y')
+                self.cmd_set(target_path, args)
         return 0
