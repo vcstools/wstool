@@ -452,6 +452,7 @@ def cmd_info(config, localnames=None, untracked=False, fetch=False):
             version = ""  # what is given in config file
             curr_version_label = ""  # e.g. branchname
             remote_revision = "" # UID on remote
+            default_remote_label = None # git default branch
             display_version = ''
             modified = ""
             currevision = ""  # revision number of version
@@ -488,6 +489,9 @@ def cmd_info(config, localnames=None, untracked=False, fetch=False):
                         version.strip() != '' and
                         (specversion is None or specversion.strip() == '')):
                         specversion = '"%s"' % version
+                    if (self.fetch and specversion == None and
+                        path_spec.get_scmtype() == 'git'):
+                        default_remote_label = self.element.get_default_remote_label()
                     currevision = path_spec.get_current_revision()
                 scm = path_spec.get_scmtype()
                 uri = path_spec.get_uri()
@@ -499,6 +503,7 @@ def cmd_info(config, localnames=None, untracked=False, fetch=False):
                     'curr_uri': curr_uri,
                     'version': version,
                     'remote_revision': remote_revision,
+                    'default_remote_label': default_remote_label,
                     'curr_version_label': curr_version_label,
                     'specversion': specversion,
                     'actualversion': currevision,

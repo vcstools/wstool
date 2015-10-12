@@ -433,6 +433,12 @@ class VCSConfigElement(ConfigElement):
                         curr_uri=curr_uri,
                         tags=self.get_properties())
 
+    def get_default_remote_label(self):
+        """
+        check remote for e.g. default git branch
+        """
+        return self._get_vcsc().get_default_remote_version_label()
+
     def get_diff(self, basepath=None):
         return self._get_vcsc().get_diff(basepath)
 
