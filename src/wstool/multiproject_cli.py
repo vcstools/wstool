@@ -1238,6 +1238,11 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
         parser.add_option("-y", "--confirm", dest="confirm", default='',
                           help="Do not ask for confirmation",
                           action="store_true")
+        # -t option required here for help but used one layer above, see cli_common
+        parser.add_option(
+            "-t", "--target-workspace", dest="workspace", default=None,
+            help="which workspace to use",
+            action="store")
         (options, args) = parser.parse_args(argv)
 
         if config is None:
