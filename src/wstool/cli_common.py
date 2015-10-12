@@ -165,8 +165,8 @@ def _get_status_flags(basepath, elt_dict):
     if (('remote_revision' in elt_dict and
          elt_dict['remote_revision'] != '' and
          elt_dict['remote_revision'] is not None and
-         elt_dict['actualversion'] is not None and
          'actualversion' in elt_dict and
+         elt_dict['actualversion'] is not None and
          elt_dict['remote_revision'] != elt_dict['actualversion']) or
         (('version' not in elt_dict or
           elt_dict['version'] is None) and
