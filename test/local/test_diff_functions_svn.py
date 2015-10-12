@@ -36,6 +36,7 @@ import os
 import sys
 from test.io_wrapper import StringIO
 import subprocess
+import re
 
 import wstool
 import wstool.helpers
@@ -99,6 +100,9 @@ class WstoolDiffSvnTest(AbstractSCMTest):
         modify_svn_repo(clone_path)
 
     def check_diff_output(self, output):
+        # svn 1.9 added the "nonexistent" output, replace it with the
+        # revision 0 that the test results expect.
+        output_fixed = re.sub("\(nonexistent\)", "(revision 0)", output)
         # svn output order varies between versions
         expected = ["""\
 Index: clone/added.txt
@@ -117,7 +121,7 @@ Index: clone/modified.txt
         for snippet in expected:
             for line in snippet.splitlines():
                 # assertIn is not supported in Python2.6
-                self.assertTrue(line in output, output)
+                self.assertTrue(line in output_fixed, output)
 
     def test_wstool_diff_svn_outside(self):
         """Test diff output for svn when run outside workspace"""
