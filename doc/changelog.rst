@@ -1,3 +1,8 @@
+0.1.12
+------
+
+- Fix command line arguments of ``wstool scrape``.
+
 0.1.11
 ------
 
@@ -5,7 +10,6 @@
 - Added the Scrape command.
 - Added default git branch and status to ``wstool fetch --info``.
 - Added versioned dependency on vcstools ``0.1.38`` to make use of new API features.
-
 
 0.1.10
 ------
