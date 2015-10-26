@@ -21,20 +21,23 @@ def get_version():
 
 
 def _resolve_prefix(prefix, type):
+    # install to outside of system if OS X to avoid issues caused by
+    # System Integrity Protection on El Caption
+    # issue: https://github.com/vcstools/wstool/issues/81
     osx_system_prefix = '/System/Library/Frameworks/Python.framework/Versions'
     if type == 'man':
         if prefix == '/usr':
             return '/usr/share'
         if sys.prefix.startswith(osx_system_prefix):
-            return '/usr/share'
+            return '/usr/local/share'
     elif type == 'bash_comp':
         if prefix == '/usr':
             return '/'
         if sys.prefix.startswith(osx_system_prefix):
-            return '/'
+            return '/usr/local'
     elif type == 'zsh_comp':
         if sys.prefix.startswith(osx_system_prefix):
-            return '/usr'
+            return '/usr/local'
     else:
         raise ValueError('not supported type')
     return prefix
