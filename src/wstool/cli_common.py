@@ -290,7 +290,7 @@ def get_info_table(basepath, entries, data_only=False, reverse=False,
     headers = OrderedDict([
         ('localname', "Localname"),
         ('status', "S"),
-        ('scm', "SCM "),
+        ('scm', "SCM"),
         ('version', "Version (Spec)"),
         ('matching', "UID  (Spec)"),
         ('uri', "URI  (Spec) [http(s)://...]"),
