@@ -32,7 +32,10 @@
 
 "Support for any command line interface (CLI) for wstool"
 
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except:
+    from ordereddict import OrderedDict
 import os
 import re
 from optparse import OptionParser
