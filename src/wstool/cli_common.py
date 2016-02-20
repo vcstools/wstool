@@ -32,6 +32,7 @@
 
 "Support for any command line interface (CLI) for wstool"
 
+from collections import OrderedDict
 import os
 import re
 from optparse import OptionParser
@@ -277,32 +278,29 @@ def get_info_table_elements(basepath, entries, unmanaged=False):
     return outputs
 
 
-def get_info_table(basepath, entries, data_only=False, reverse=False, unmanaged=False):
+def get_info_table(basepath, entries, data_only=False, reverse=False,
+                   unmanaged=False, selected_headers=None):
     """
     return a refined textual representation of the entries. Provides
     column headers and processes data.
     """
+    headers = OrderedDict([
+        ('localname', "Localname"),
+        ('status', "S"),
+        ('scm', "SCM "),
+        ('version', "Version (Spec)"),
+        ('matching', "UID  (Spec)"),
+        ('uri', "URI  (Spec) [http(s)://...]"),
+    ])
+    # table design
     if unmanaged:
-        headers = {
-            'uri': "URI [http(s)://...]",
-            'scm': "SCM ",
-            'localname': "Localname"}
-
-        # table design
         selected_headers = ['localname', 'scm', 'uri']
-    else:
-
-        headers = {
-            'uri': "URI  (Spec) [http(s)://...]",
-            'scm': "SCM ",
-            'localname': "Localname",
-            'version': "Version (Spec)",
-            'matching': "UID  (Spec)",
-            'status': "S"}
-
-        # table design
-        selected_headers = ['localname', 'status', 'scm', 'version',
-                            'matching', 'uri']
+    elif selected_headers is None:
+        selected_headers = headers.keys()
+    # validate selected_headers
+    invalid_headers = [h for h in selected_headers if h not in headers.keys()]
+    if invalid_headers:
+        raise ValueError('Invalid headers are passed: %s' % invalid_headers)
 
     outputs = get_info_table_elements(
         basepath=basepath,

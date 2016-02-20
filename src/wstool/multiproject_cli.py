@@ -1133,6 +1133,10 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
             help="Does not provide explanations",
             action="store_true")
         parser.add_option(
+            "-s", "--short", dest="short", default=False,
+            help="Shows simplified version info table.",
+            action="store_true")
+        parser.add_option(
             "--only", dest="only", default=False,
             help="Shows comma-separated lists of only given comma-separated attribute(s).",
             action="store")
@@ -1203,12 +1207,17 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
                                 options.data_only))
             return 0
 
+        columns = None
+        if options.short:
+            columns = ['localname', 'status', 'version']
+
         header = 'workspace: %s' % (target_path)
         print(header)
         table = get_info_table(config.get_base_path(),
                                outputs,
                                options.data_only,
-                               reverse=reverse)
+                               reverse=reverse,
+                               selected_headers=columns)
         if table is not None and table != '':
            print("\n%s" % table)
 
@@ -1218,7 +1227,8 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
                                    outputs2,
                                    options.data_only,
                                    reverse=reverse,
-                                   unmanaged=True)
+                                   unmanaged=True,
+                                   selected_headers=columns)
             if table2 is not None and table2 != '':
                 print("\nAlso detected these repositories in the workspace, add using '%s scrape' or '%s set':\n\n%s" % (self.progname, self.progname, table2))
 
