@@ -285,7 +285,7 @@ def get_info_table(basepath, entries, data_only=False, reverse=False, unmanaged=
     if unmanaged:
         headers = {
             'uri': "URI [http(s)://...]",
-            'scm': "SCM ",
+            'scm': "SCM",
             'localname': "Localname"}
 
         # table design
@@ -294,7 +294,7 @@ def get_info_table(basepath, entries, data_only=False, reverse=False, unmanaged=
 
         headers = {
             'uri': "URI  (Spec) [http(s)://...]",
-            'scm': "SCM ",
+            'scm': "SCM",
             'localname': "Localname",
             'version': "Version (Spec)",
             'matching': "UID  (Spec)",
