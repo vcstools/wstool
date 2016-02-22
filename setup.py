@@ -99,6 +99,14 @@ if HAVE_SPHINX:
 else:
     cmdclass = {}
 
+
+install_requires = ['vcstools>=0.1.38', 'pyyaml']
+try:
+    from collections import OrderedDict
+except ImportError:
+    install_requires.append('ordereddict')  # for python<=2.6
+
+
 setup(name='wstool',
       version=get_version(),
       packages=['wstool'],
@@ -106,7 +114,7 @@ setup(name='wstool',
       data_files=data_files,
       cmdclass=cmdclass,
       # rosinstall dependency to be kept in order not to break ros hydro install instructions
-      install_requires=['vcstools>=0.1.38', 'pyyaml'],
+      install_requires=install_requires,
       scripts=["scripts/wstool"],
       author="Tully Foote",
       author_email="tfoote@osrfoundation.org",
