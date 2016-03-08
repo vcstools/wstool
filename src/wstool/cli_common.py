@@ -32,6 +32,10 @@
 
 "Support for any command line interface (CLI) for wstool"
 
+try:
+    from collections import OrderedDict
+except:
+    from ordereddict import OrderedDict
 import os
 import re
 from optparse import OptionParser
@@ -282,27 +286,19 @@ def get_info_table(basepath, entries, data_only=False, reverse=False, unmanaged=
     return a refined textual representation of the entries. Provides
     column headers and processes data.
     """
+    headers = OrderedDict([
+        ('localname', "Localname"),
+        ('status', "S"),
+        ('scm', "SCM "),
+        ('version', "Version (Spec)"),
+        ('matching', "UID  (Spec)"),
+        ('uri', "URI  (Spec) [http(s)://...]"),
+    ])
+    # table design
     if unmanaged:
-        headers = {
-            'uri': "URI [http(s)://...]",
-            'scm': "SCM ",
-            'localname': "Localname"}
-
-        # table design
         selected_headers = ['localname', 'scm', 'uri']
     else:
-
-        headers = {
-            'uri': "URI  (Spec) [http(s)://...]",
-            'scm': "SCM ",
-            'localname': "Localname",
-            'version': "Version (Spec)",
-            'matching': "UID  (Spec)",
-            'status': "S"}
-
-        # table design
-        selected_headers = ['localname', 'status', 'scm', 'version',
-                            'matching', 'uri']
+        selected_headers = headers.keys()
 
     outputs = get_info_table_elements(
         basepath=basepath,
