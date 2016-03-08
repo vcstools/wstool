@@ -281,7 +281,8 @@ def get_info_table_elements(basepath, entries, unmanaged=False):
     return outputs
 
 
-def get_info_table(basepath, entries, data_only=False, reverse=False, unmanaged=False):
+def get_info_table(basepath, entries, data_only=False, reverse=False,
+                   unmanaged=False, selected_headers=None):
     """
     return a refined textual representation of the entries. Provides
     column headers and processes data.
@@ -297,8 +298,12 @@ def get_info_table(basepath, entries, data_only=False, reverse=False, unmanaged=
     # table design
     if unmanaged:
         selected_headers = ['localname', 'scm', 'uri']
-    else:
+    elif selected_headers is None:
         selected_headers = headers.keys()
+    # validate selected_headers
+    invalid_headers = [h for h in selected_headers if h not in headers.keys()]
+    if invalid_headers:
+        raise ValueError('Invalid headers are passed: %s' % invalid_headers)
 
     outputs = get_info_table_elements(
         basepath=basepath,
