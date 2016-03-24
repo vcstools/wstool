@@ -659,6 +659,18 @@ $ %(progname)s foreach --git 'git status'
         parser.add_option("--bzr", dest="bzr", default=False,
                           help="run command in bzr entries",
                           action="store_true")
+        parser.add_option("-m", "--timeout", dest="timeout",
+                          default=None,
+                          help="How long to wait for each repo before failing [seconds]",
+                          action="store", type=float)
+        parser.add_option("-j", "--parallel", dest="jobs",
+                          default=1,
+                          help="How many parallel threads to use for running the custom commands",
+                          action="store")
+        parser.add_option("-v", "--verbose", dest="verbose",
+                          default=False,
+                          help="Whether to print out more information",
+                          action="store_true")
         # -t option required here for help but used one layer above
         # see cli_common
         parser.add_option("-t", "--target-workspace", dest="workspace",
@@ -705,14 +717,18 @@ $ %(progname)s foreach --git 'git status'
         outputs = multiproject_cmd.cmd_foreach(config,
                                                command=command,
                                                localnames=localnames,
+                                               num_threads=int(options.jobs),
+                                               timeout=options.timeout,
                                                scm_types=scm_types,
-                                               shell=options.shell)
+                                               shell=options.shell,
+                                               verbose=options.verbose)
 
         def add_localname_prefix(localname, lines):
             return ['[%s] %s' % (localname, line) for line in lines]
 
         for output in outputs:
             localname = output['entry'].get_local_name()
+            rc = output['returncode']
             if options.show_stdout:
                 if output['stdout'] is None:
                     continue
@@ -721,13 +737,17 @@ $ %(progname)s foreach --git 'git status'
                 sys.stdout.write('\n'.join(lines))
                 sys.stdout.write('\n')
             if options.show_stderr:
-                if output['stderr'] is None:
+                lines = []
+                if output['stderr'] is not None:
+                    lines += output['stderr'].strip().split('\n')
+                if rc != 0:
+                    lines +=  ['Command failed with return code [%s]' % rc]
+                if not lines:
                     continue
-                lines = output['stderr'].strip().split('\n')
                 lines = add_localname_prefix(localname, lines)
                 sys.stderr.write('\n'.join(lines))
                 sys.stderr.write('\n')
-        return 0
+        return 0 if all([o['returncode'] == 0  for o in outputs]) else 1
 
     def cmd_status(self, target_path, argv, config=None):
         parser = OptionParser(usage="usage: %s status [localname]* " % self.progname,

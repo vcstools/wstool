@@ -278,32 +278,51 @@ def cmd_diff(config, localnames=None):
     return outputs
 
 
-def cmd_foreach(config, command, localnames=None, scm_types=None, shell=False):
+def cmd_foreach(
+    config,
+    command,
+    localnames=None,
+    num_threads=1,
+    timeout=None,
+    scm_types=None,
+    shell=False,
+    verbose=False):
     """Run command in all SCM entries in config, relative to path"""
 
     class ForeachRetriever(object):
-        def __init__(self, element, command, shell):
+        def __init__(self, element, command, timeout, shell, verbose):
             self.element = element
             self.command = command
+            self.timeout = timeout
             self.shell = shell
+            self.verbose = verbose
 
         def do_work(self):
             command = self.command
             if not self.shell:
                 command = shlex.split(command)
-            _, stdout, stderr = run_shell_command(command,
-                                                  cwd=self.element.path,
-                                                  show_stdout=False,
-                                                  shell=self.shell)
-            return {'stdout': stdout, 'stderr': stderr}
+            returncode, stdout, stderr = run_shell_command(
+                command,
+                cwd=self.element.path,
+                timeout=self.timeout,
+                shell=self.shell,
+                show_stdout=self.verbose)
+            return {'returncode': returncode,
+                    'stdout': stdout,
+                    'stderr': stderr}
 
     elements = select_elements(config, localnames)
-    work = DistributedWork(capacity=len(elements))
+    work = DistributedWork(capacity=len(elements),
+                           num_threads=num_threads)
     for element in elements:
         if ((scm_types is not None) and
                 (element.get_vcs_type_name() not in scm_types)):
             continue
-        work.add_thread(ForeachRetriever(element, command, shell))
+        work.add_thread(ForeachRetriever(element,
+                                         command,
+                                         timeout,
+                                         shell,
+                                         verbose))
     outputs = work.run()
     return outputs
 
