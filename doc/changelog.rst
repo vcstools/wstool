@@ -1,3 +1,11 @@
+0.1.13
+------
+
+- Fix to avoid errors due to installing man pages with OS X's 10.11's new SIP settings.
+- Added option to show a simplified version info table.
+- Added the -m (timeout), -v (verbose), and -j (parallel jobs) options to each command.
+- Contributors: @NikolausDemmel, @wkentaro
+
 0.1.12
 ------
 
