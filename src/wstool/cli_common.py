@@ -399,16 +399,17 @@ def get_info_list(basepath, line, data_only=False):
     return result
 
 
-def get_info_table_raw_csv(config, properties, localnames):
+def get_info_table_raw_csv(config, parser, properties, localnames):
     """
     returns raw data without decorations in comma-separated value format.
     allows to select properties.
     Given a config, collects all elements, and prints a line of each,
     with selected properties in the output
 
+    :param parser: OptionParser used to throw option errors
     :param properties: list of property ids to display
     :param localnames: which config elements to show
-    .return: list of str, each a csv line
+    :return: list of str, each a csv line
     """
     lookup_required = False
     for attr in properties:
