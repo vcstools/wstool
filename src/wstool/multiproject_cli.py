@@ -1205,6 +1205,7 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
             if only_options == '':
                 parser.error('No valid options given')
             lines = get_info_table_raw_csv(config,
+                                           parser,
                                            properties=only_options,
                                            localnames=args)
             print('\n'.join(lines))
