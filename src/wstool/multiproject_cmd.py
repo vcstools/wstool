@@ -178,10 +178,12 @@ def add_uris(config,
 
 
 def cmd_persist_config(config, filename, header=None,
-                       pretty=False, sort_with_localname=False):
+                       pretty=False, sort_with_localname=False,
+                       curr_revision=False, vcs_only=False):
     """writes config to given file in yaml syntax"""
     generate_config_yaml(config, filename, header,
-                         pretty, sort_with_localname)
+                         pretty, sort_with_localname,
+                         curr_revision, vcs_only)
 
 
 def cmd_version():

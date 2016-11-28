@@ -249,7 +249,7 @@ class PathSpec:
             return 'setup-file'
         return 'other'
 
-    def get_legacy_yaml(self):
+    def get_legacy_yaml(self, curr_revision=False):
         """
         return something like
         {hg: {local-name: common,
@@ -260,8 +260,12 @@ class PathSpec:
         properties = {'local-name': self._local_name}
         if self._uri is not None:
             properties['uri'] = self._uri
-        if self._version is not None:
-            properties['version'] = self._version
+        if curr_revision:
+            if self._currevision is not None:
+                properties['version'] = self._currevision
+        else:
+            if self._version is not None:
+                properties['version'] = self._version
         if self._tags is not None:
             for tag in self._tags:
                 if tag != 'setup-file' and tag != []:
@@ -378,29 +382,39 @@ def get_path_spec_from_yaml(yaml_dict):
 
 
 def generate_config_yaml(config, filename, header, pretty=False,
-                         sort_with_localname=False):
+                         sort_with_localname=False, curr_revision=False,
+                         vcs_only=False):
     """
     Writes file filename with header first and then the config as yaml
     """
     if not os.path.exists(config.get_base_path()):
         os.makedirs(config.get_base_path())
-    config_filepath = os.path.realpath(os.path.join(config.get_base_path(), filename))
-    with open(config_filepath, 'w+b') as f:
-        if header is not None:
-            f.write(header.encode('UTF-8'))
-        if sort_with_localname:
-            items = [x.get_legacy_yaml() for x in
-                        sorted(config.get_source(),
-                               key=lambda x:x.get_local_name())]
-        else:
-            items = [x.get_legacy_yaml() for x in config.get_source()]
 
-        if not items:
-            return
+    content = ""
+    if header:
+        content += header
+    if sort_with_localname:
+        items = [x.get_legacy_yaml(curr_revision) for x in
+                 sorted(config.get_source(curr_revision, vcs_only),
+                        key=lambda x:x.get_local_name())]
+    else:
+        items = [x.get_legacy_yaml(curr_revision)
+                 for x in config.get_source(curr_revision, vcs_only)]
 
-        if pretty:
-            content = yaml.safe_dump(items, allow_unicode=True,
-                                     default_flow_style=False)
-        else:
-            content = yaml.safe_dump(items)
-        f.write(content.encode('UTF-8'))
+    if not items:
+        return
+
+    if pretty:
+        content += yaml.safe_dump(items, allow_unicode=True,
+                                 default_flow_style=False)
+    else:
+        content += yaml.safe_dump(items)
+
+    if filename:
+        config_filepath = filename if os.path.isabs(filename) else \
+            os.path.realpath(os.path.join(config.get_base_path(), filename))
+
+        with open(config_filepath, 'w+b') as f:
+            f.write(content.encode('UTF-8'))
+    else:
+        print content

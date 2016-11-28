@@ -465,7 +465,8 @@ $ %(prog)s init ~/fuerte /opt/ros/fuerte
 
         # includes ROS specific files
 
-        print("Writing %s" % os.path.join(config.get_base_path(), self.config_filename))
+        if self.config_filename:
+            print("Writing %s" % os.path.join(config.get_base_path(), self.config_filename))
         self.config_generator(config, self.config_filename, get_header(self.progname))
 
         ## install or update each element
@@ -1107,6 +1108,46 @@ The command removes entries from your configuration file, it does not affect you
                                                 self.config_filename))
             self.config_generator(config, self.config_filename)
             print("Removed entries %s" % args)
+
+        return 0
+
+
+    def cmd_snapshot(self, target_path, argv, config=None):
+        parser = OptionParser(
+            usage="usage: %s info [localname]* [OPTIONS]" % self.progname,
+            formatter=IndentedHelpFormatterWithNL(),
+            description=__MULTIPRO_CMD_DICT__["snapshot"] + """
+
+Generates a snapshot from the current workspace.
+
+Examples:
+$ %(prog)s snapshot
+""" % {'prog': self.progname, 'opts': ONLY_OPTION_VALID_ATTRS},
+            epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
+        parser.add_option("-o", "--output", dest="output_filename", default=None,
+                          help="Write the .rosinstall snapshot to the specified file",
+                          action="store")
+        parser.add_option("-t", "--target-workspace", dest="workspace", default=None,
+                          help="which workspace to use",
+                          action="store")
+
+        (options, _) = parser.parse_args(argv)
+
+        if config is None:
+            config = multiproject_cmd.get_config(
+                target_path,
+                additional_uris=[],
+                config_filename=self.config_filename)
+        elif config.get_base_path() != target_path:
+            raise MultiProjectException("Config path does not match %s %s " %
+                                        (config.get_base_path(), target_path))
+
+        fname = options.output_filename
+        if fname:
+            fname = os.path.abspath(fname)
+            print("Writing %s" % fname)
+        self.config_generator(config, fname, get_header(self.progname),
+                              curr_revision=True, vcs_only=True)
 
         return 0
 
