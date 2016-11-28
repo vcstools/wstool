@@ -70,7 +70,7 @@ __MULTIPRO_CMD_DICT__ = {
 __MULTIPRO_CMD_HELP_LIST__ = ['help', 'init',
                               None, 'set', 'merge', 'remove', 'scrape',
                               None, 'update',
-                              None, 'info', 'status', 'diff', 'foreach']
+                              None, 'info', 'snapshot', 'status', 'diff', 'foreach']
 
 # command aliases
 __MULTIPRO_CMD_ALIASES__ = {'update': 'up',
