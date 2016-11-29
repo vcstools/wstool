@@ -40,7 +40,7 @@ from test.io_wrapper import StringIO
 from wstool.wstool_cli import wstool_main
 
 from test.scm_test_base import AbstractSCMTest, _add_to_file, get_git_hash
-from test_diff_functions_git import create_git_repo, modify_git_repo
+from test.local.test_diff_functions_git import create_git_repo, modify_git_repo
 
 
 class WstoolExportTest(AbstractSCMTest):
@@ -100,6 +100,7 @@ class WstoolExportTest(AbstractSCMTest):
         wstool_main(cmd)
         sys.stdout = sys.__stdout__
         output = output.getvalue().encode('utf-8')
+        expected_output = expected_output.encode('utf-8')
         self.assertEqual(expected_output, output)
 
     def test_wstool_export(self):

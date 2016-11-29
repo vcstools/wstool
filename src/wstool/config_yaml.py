@@ -442,7 +442,7 @@ def generate_config_yaml(config, filename, header, pretty=False,
     items = config.get_source(not passthrough, vcs_only)
     if sort_with_localname:
         items = sorted(items, key=lambda x: x.get_local_name())
-    items = map(lambda x: x.get_legacy_yaml(spec, exact), items)
+    items = [x.get_legacy_yaml(spec, exact) for x in items]
 
     if items:
         if pretty:
