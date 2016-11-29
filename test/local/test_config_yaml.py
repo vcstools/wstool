@@ -194,7 +194,7 @@ class ConfigFile_Test(unittest.TestCase):
         with open(filepath, 'r') as f:
             read_data = f.read()
         lines = read_data.splitlines()
-        self.assertLess(0, len(lines))
+        self.assertTrue(len(lines) > 0)
         self.assertEqual(header, lines[0])
         check_config_entries(self, lines[1:], uuid)
 
