@@ -111,10 +111,10 @@ _wstool_complete()
     cmdOpts="-t --target-workspace  --delete-changed-uris --abort-changed-uris --backup-changed-uris"
     ;;
   export)
-    cmdOpts="-t --target-workspace -o --output --exact"
+    cmdOpts="-t --target-workspace -o --output --exact --spec"
     ;;
   info)
-    cmdOpts="-t --target-workspace --data-only --no-pkg-path --pkg-path-only --only --yaml"
+    cmdOpts="-t --target-workspace --data-only --no-pkg-path --pkg-path-only --only --yaml -u --untracked --fetch -s --short --root -m --managed-only"
     ;;
   *)
     ;;

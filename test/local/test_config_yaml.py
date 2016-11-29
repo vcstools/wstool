@@ -41,7 +41,7 @@ import wstool.config
 from wstool.common import MultiProjectException
 from wstool.config_yaml import rewrite_included_source, \
     get_path_spec_from_yaml, get_yaml_from_uri, get_path_specs_from_uri, \
-    PathSpec, aggregate_from_uris
+    PathSpec, aggregate_from_uris, __REPOTYPES__
 
 _test_root = os.path.dirname(os.path.dirname(__file__))
 
@@ -174,7 +174,9 @@ class ConfigFile_Test(unittest.TestCase):
         subprocess.check_call(['touch', 'test.txt'], cwd=repo_path)
         subprocess.check_call(['git', 'add', '*'], cwd=repo_path)
         subprocess.check_call(['git', 'commit', '-m', 'msg'], cwd=repo_path)
-        po = subprocess.Popen(["git", "rev-parse", "HEAD"], cwd=repo_path,
+        subprocess.check_call(['git', 'remote', 'add', 'origin', self.uri],
+                              cwd=repo_path)
+        po = subprocess.Popen(['git', 'rev-parse', 'HEAD'], cwd=repo_path,
                               stdout=subprocess.PIPE)
         uuid = po.stdout.read().decode('UTF-8').rstrip('"\n').lstrip('"\n')
         return uuid
@@ -185,6 +187,11 @@ class ConfigFile_Test(unittest.TestCase):
         header = '# Hello'
         filename = 'foo'
         uuid = self.make_repo_get_uuid()
+
+        for entry in entries:
+            self.assertTrue(isinstance(entry, PathSpec))
+            if entry._scmtype:
+                self.assertTrue(entry._scmtype in __REPOTYPES__)
 
         config = wstool.config.Config(entries, self.directory)
         wstool.config_yaml.generate_config_yaml(config, filename,
@@ -212,12 +219,12 @@ class ConfigFile_Test(unittest.TestCase):
                     [PathSpec(self.git, 'git', self.uri, self.version),
                      PathSpec(self.other)])
 
-    def test_generate_with_current_revision(self):
+    def test_generate_with_exact(self):
         def check_config_entries(self, lines, uuid):
             self.assertEqual(2, len(lines))
             self.assertEqual(self.git_el % uuid, lines[0])
             self.assertEqual(self.other_el, lines[1])
-        self.helper(check_config_entries, {'curr_revision': True},
+        self.helper(check_config_entries, {'spec': False, 'exact': True},
                     [PathSpec(self.git, 'git', self.uri, self.version),
                      PathSpec(self.other)])
 
@@ -229,12 +236,12 @@ class ConfigFile_Test(unittest.TestCase):
                     [PathSpec(self.git, 'git', self.uri, self.version),
                      PathSpec(self.other)])
 
-    def test_generate_for_export_exact(self):
+    def test_generate_with_spec_exact(self):
         def check_config_entries(self, lines, uuid):
             self.assertEqual(1, len(lines))
             self.assertEqual(self.git_el % uuid, lines[0])
         self.helper(check_config_entries,
-                    {'curr_revision': True, 'vcs_only': True},
+                    {'spec': True, 'exact': 'True', 'vcs_only': True},
                     [PathSpec(self.git, 'git', self.uri, self.version),
                      PathSpec(self.other)])
 

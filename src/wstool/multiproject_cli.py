@@ -1118,24 +1118,30 @@ The command removes entries from your configuration file, it does not affect you
             description=__MULTIPRO_CMD_DICT__["export"] + """
 Exports the current workspace.
 
-The --exact
+The --exact option will cause the output to contain the exact commit uuid for
+each version-controlled entry. The --spec option tells wstool to look at the
+workspace .rosinstall for versioning info instead of the workspace.
 
 Examples:
-$ %(prog)s %(cmd)s
-$ %(prog)s %(cmd)s -t ~/ros/fuerte
-$ %(prog)s %(cmd)s --exact
-""" % {'prog': self.progname, 'cmd': 'export',
-       'opts': ONLY_OPTION_VALID_ATTRS},
+$ %(prog)s export
+$ %(prog)s export -t ~/ros/fuerte
+$ %(prog)s export --exact
+""" % {'prog': self.progname, 'opts': ONLY_OPTION_VALID_ATTRS},
             epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
-        parser.add_option("-o", "--output", dest="output_filename", default=None,
-                          help="Write the .rosinstall export to the specified file",
-                          action="store")
-        parser.add_option("-t", "--target-workspace", dest="workspace", default=None,
-                          help="which workspace to use",
-                          action="store")
+        parser.add_option(
+            "-o", "--output", dest="output_filename", default=None,
+            help="Write the .rosinstall export to the specified file",
+            action="store")
+        parser.add_option(
+            "-t", "--target-workspace", dest="workspace", default=None,
+            help="which workspace to use",
+            action="store")
         parser.add_option(
             "--exact", dest="exact", default=False, action="store_true",
             help="export exact commit hashes instead of branch names")
+        parser.add_option(
+            "--spec", dest="spec", default=False, action="store_true",
+            help="export version from workspace spec instead of current")
 
         (options, _) = parser.parse_args(argv)
 
@@ -1148,12 +1154,15 @@ $ %(prog)s %(cmd)s --exact
             raise MultiProjectException("Config path does not match %s %s " %
                                         (config.get_base_path(), target_path))
 
+        # TODO: Check for workspace differences and issue warnings?
+
         fname = options.output_filename
         if fname:
             fname = os.path.abspath(fname)
             print("Writing %s" % fname)
         self.config_generator(config, fname, get_header(self.progname),
-                              curr_revision=options.exact, vcs_only=True)
+                              spec=options.spec, exact=options.exact,
+                              vcs_only=True)
 
         return 0
 
@@ -1257,6 +1266,8 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
             print('\n'.join(lines))
             return 0
         elif options.yaml:
+            # TODO: Not sure what this does, used to be cmd_snapshot,
+            # but that command was not implemented.
             source_aggregate = multiproject_cmd.cmd_export(config,
                                                              localnames=args)
             print(yaml.safe_dump(source_aggregate), end='')

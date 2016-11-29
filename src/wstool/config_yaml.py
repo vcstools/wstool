@@ -34,11 +34,12 @@ import os
 import yaml
 from vcstools.common import urlopen_netrc
 from wstool.common import MultiProjectException
+import wstool.config
 
 __REPOTYPES__ = ['svn', 'bzr', 'hg', 'git', 'tar']
 __ALLTYPES__ = __REPOTYPES__ + ['other', 'setup-file']
 
-## The Path spec is a leightweigt object to transport the
+## The Path spec is a lightweight object to transport the
 ## specification of a config element between functions,
 ## independently of yaml structure.
 ## Specifications are persisted in yaml, this file deals
@@ -249,11 +250,14 @@ class PathSpec:
             return 'setup-file'
         return 'other'
 
-    def get_legacy_yaml(self, curr_revision=False):
+    def get_legacy_yaml(self, spec=True, exact=False):
         """
-        :param curr_revision: If True, return the entry with the version set to
-        the UUID of the currently checked-out version. If False, return
-        current version specified for workspace (i.e., in the .rosinstall).
+        :param spec: If True, the version information will come from the
+        workspace .rosinstall. If False, the version information will come
+        from the current work trees.
+        :param exact: If True, the versions will be set to the exact commit
+        UUIDs. If False, the version name will be used, which might be a
+        branch name aut cetera.
 
         return something like
         {hg: {local-name: common,
@@ -262,14 +266,26 @@ class PathSpec:
         """
         # TODO switch to new syntax
         properties = {'local-name': self._local_name}
-        if self._uri is not None:
-            properties['uri'] = self._uri
-        if curr_revision:
-            if self._currevision is not None:
-                properties['version'] = self._currevision
+        if spec:
+            if self._uri is not None:
+                properties['uri'] = self._uri
+            if exact:
+                if self._revision is not None:
+                    properties['version'] = self._revision
+            else:
+                if self._version is not None:
+                    properties['version'] = self._version
         else:
-            if self._version is not None:
-                properties['version'] = self._version
+            if self._curr_uri is not None:
+                properties['uri'] = self._curr_uri
+            if exact:
+                if self._currevision is not None:
+                    properties['version'] = self._currevision
+
+            else:
+                if self._curr_version is not None:
+                    properties['version'] = self._curr_version
+
         if self._tags is not None:
             for tag in self._tags:
                 if tag != 'setup-file' and tag != []:
@@ -386,8 +402,8 @@ def get_path_spec_from_yaml(yaml_dict):
 
 
 def generate_config_yaml(config, filename, header, pretty=False,
-                         sort_with_localname=False, curr_revision=False,
-                         vcs_only=False):
+                         sort_with_localname=False, spec=True,
+                         exact=False, vcs_only=False):
     """
     Writes file filename with header first and then the config as YAML.
 
@@ -401,26 +417,32 @@ def generate_config_yaml(config, filename, header, pretty=False,
     long-form YAML. If false, the default flow style will be used instead.
     :param sort_with_localname: If true, config entries will be sorted by their
     localname fields. If false, the order will be as passed in through config.
-    :param curr_revision: If True, the versions will be set to the current
-    UUIDs. If False, the version specified in the workspace .rosinstall will be
-    used.
+    :param spec: If True, the version information will come from the workspace
+    .rosinstall. If False, the version information will come from the current
+    work trees.
+    :param exact: If True, the versions will be set to the exact commit UUIDs.
+    If False, the version name will be used, which might be a branch name
+    aut cetera.
     :param vcs_only: If True, the generated config YAML will include only
     version-controlled entries. If False, all entries in current workspace will
     be included.
     """
+    assert isinstance(config, wstool.config.Config)
+
     if not os.path.exists(config.get_base_path()):
         os.makedirs(config.get_base_path())
 
     content = ""
     if header:
         content += header
+
+    # Do a pass-through if just pulling versioning information straight from
+    # the .rosinstall
+    passthrough = spec and not exact
+    items = config.get_source(not passthrough, vcs_only)
     if sort_with_localname:
-        items = [x.get_legacy_yaml(curr_revision) for x in
-                 sorted(config.get_source(curr_revision, vcs_only),
-                        key=lambda x:x.get_local_name())]
-    else:
-        items = [x.get_legacy_yaml(curr_revision)
-                 for x in config.get_source(curr_revision, vcs_only)]
+        items = sorted(items, key=lambda x: x.get_local_name())
+    items = map(lambda x: x.get_legacy_yaml(spec, exact), items)
 
     if items:
         if pretty:
