@@ -251,6 +251,10 @@ class PathSpec:
 
     def get_legacy_yaml(self, curr_revision=False):
         """
+        :param curr_revision: If True, return the entry with the version set to
+        the UUID of the currently checked-out version. If False, return
+        current version specified for workspace (i.e., in the .rosinstall).
+
         return something like
         {hg: {local-name: common,
               version: common-1.0.2,
@@ -417,4 +421,4 @@ def generate_config_yaml(config, filename, header, pretty=False,
         with open(config_filepath, 'w+b') as f:
             f.write(content.encode('UTF-8'))
     else:
-        print content
+        print(content)

@@ -243,6 +243,10 @@ class Config:
 
     def get_source(self, versioned=False, vcs_only=False):
         """
+        :param versioned: True returns sources as versioned PathSpec, False
+        returns sources as simple PathSpec
+        :param vcs_only: True returns only version-controlled sources, False
+        returns all sources
         :returns: all elements that got added by user keystrokes
         (CLI and changed .rosinstall)
         """
