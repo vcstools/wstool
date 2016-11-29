@@ -229,7 +229,7 @@ class ConfigFile_Test(unittest.TestCase):
                     [PathSpec(self.git, 'git', self.uri, self.version),
                      PathSpec(self.other)])
 
-    def test_generate_for_snapshot(self):
+    def test_generate_for_export_exact(self):
         def check_config_entries(self, lines, uuid):
             self.assertEqual(1, len(lines))
             self.assertEqual(self.git_el % uuid, lines[0])

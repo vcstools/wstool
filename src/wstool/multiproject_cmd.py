@@ -422,7 +422,7 @@ def cmd_install_or_update(
     # but it could go here
 
 
-def cmd_snapshot(config, localnames=None):
+def cmd_export(config, localnames=None):
     elements = select_elements(config, localnames)
     source_aggregate = []
     for element in elements:

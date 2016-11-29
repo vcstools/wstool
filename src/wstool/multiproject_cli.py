@@ -59,7 +59,7 @@ __MULTIPRO_CMD_DICT__ = {
     "set":      "add or changes one entry from your workspace config",
     "update":   "update or check out some of your config elements",
     "remove":   "remove an entry from your workspace config, without deleting files",
-    "snapshot": "write a file specifying repositories to have the version they currently have",
+    "export":   "export a snapshot of the workspace",
     "diff":     "print a diff over some SCM controlled entries",
     "foreach":  "run shell command in given entries",
     "status":   "print the change status of files in some SCM controlled entries",
@@ -70,7 +70,7 @@ __MULTIPRO_CMD_DICT__ = {
 __MULTIPRO_CMD_HELP_LIST__ = ['help', 'init',
                               None, 'set', 'merge', 'remove', 'scrape',
                               None, 'update',
-                              None, 'info', 'snapshot', 'status', 'diff', 'foreach']
+                              None, 'info', 'export', 'status', 'diff', 'foreach']
 
 # command aliases
 __MULTIPRO_CMD_ALIASES__ = {'update': 'up',
@@ -1111,25 +1111,31 @@ The command removes entries from your configuration file, it does not affect you
 
         return 0
 
-
-    def cmd_snapshot(self, target_path, argv, config=None):
+    def cmd_export(self, target_path, argv, config=None):
         parser = OptionParser(
             usage="usage: %s info [localname]* [OPTIONS]" % self.progname,
             formatter=IndentedHelpFormatterWithNL(),
-            description=__MULTIPRO_CMD_DICT__["snapshot"] + """
+            description=__MULTIPRO_CMD_DICT__["export"] + """
+Exports the current workspace.
 
-Generates a snapshot from the current workspace.
+The --exact
 
 Examples:
-$ %(prog)s snapshot
-""" % {'prog': self.progname, 'opts': ONLY_OPTION_VALID_ATTRS},
+$ %(prog)s %(cmd)s
+$ %(prog)s %(cmd)s -t ~/ros/fuerte
+$ %(prog)s %(cmd)s --exact
+""" % {'prog': self.progname, 'cmd': 'export',
+       'opts': ONLY_OPTION_VALID_ATTRS},
             epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
         parser.add_option("-o", "--output", dest="output_filename", default=None,
-                          help="Write the .rosinstall snapshot to the specified file",
+                          help="Write the .rosinstall export to the specified file",
                           action="store")
         parser.add_option("-t", "--target-workspace", dest="workspace", default=None,
                           help="which workspace to use",
                           action="store")
+        parser.add_option(
+            "--exact", dest="exact", default=False, action="store_true",
+            help="export exact commit hashes instead of branch names")
 
         (options, _) = parser.parse_args(argv)
 
@@ -1147,10 +1153,9 @@ $ %(prog)s snapshot
             fname = os.path.abspath(fname)
             print("Writing %s" % fname)
         self.config_generator(config, fname, get_header(self.progname),
-                              curr_revision=True, vcs_only=True)
+                              curr_revision=options.exact, vcs_only=True)
 
         return 0
-
 
     def cmd_info(self, target_path, argv, reverse=True, config=None):
         parser = OptionParser(
@@ -1252,7 +1257,7 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
             print('\n'.join(lines))
             return 0
         elif options.yaml:
-            source_aggregate = multiproject_cmd.cmd_snapshot(config,
+            source_aggregate = multiproject_cmd.cmd_export(config,
                                                              localnames=args)
             print(yaml.safe_dump(source_aggregate), end='')
             return 0
