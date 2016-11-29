@@ -389,7 +389,24 @@ def generate_config_yaml(config, filename, header, pretty=False,
                          sort_with_localname=False, curr_revision=False,
                          vcs_only=False):
     """
-    Writes file filename with header first and then the config as yaml
+    Writes file filename with header first and then the config as YAML.
+
+    :param config: The configuration containing all the entries to be included
+    in the generated YAML.
+    :param filename: If filename is not an absolute path, it will be assumed to
+    be relative to config.get_base_path(). If filename is None, the output will
+    be sent to stdout instead of a file.
+    :param header: A header to be included with the generated config YAML.
+    :param pretty: If True, the generated config YAML will be printed in
+    long-form YAML. If false, the default flow style will be used instead.
+    :param sort_with_localname: If true, config entries will be sorted by their
+    localname fields. If false, the order will be as passed in through config.
+    :param curr_revision: If True, the versions will be set to the current
+    UUIDs. If False, the version specified in the workspace .rosinstall will be
+    used.
+    :param vcs_only: If True, the generated config YAML will include only
+    version-controlled entries. If False, all entries in current workspace will
+    be included.
     """
     if not os.path.exists(config.get_base_path()):
         os.makedirs(config.get_base_path())
@@ -405,14 +422,12 @@ def generate_config_yaml(config, filename, header, pretty=False,
         items = [x.get_legacy_yaml(curr_revision)
                  for x in config.get_source(curr_revision, vcs_only)]
 
-    if not items:
-        return
-
-    if pretty:
-        content += yaml.safe_dump(items, allow_unicode=True,
-                                 default_flow_style=False)
-    else:
-        content += yaml.safe_dump(items)
+    if items:
+        if pretty:
+            content += yaml.safe_dump(items, allow_unicode=True,
+                                      default_flow_style=False)
+        else:
+            content += yaml.safe_dump(items)
 
     if filename:
         config_filepath = filename if os.path.isabs(filename) else \
