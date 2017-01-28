@@ -178,10 +178,12 @@ def add_uris(config,
 
 
 def cmd_persist_config(config, filename, header=None,
-                       pretty=False, sort_with_localname=False):
+                       pretty=False, sort_with_localname=False,
+                       spec=True, exact=False, vcs_only=False):
     """writes config to given file in yaml syntax"""
     generate_config_yaml(config, filename, header,
-                         pretty, sort_with_localname)
+                         pretty, sort_with_localname,
+                         spec, exact, vcs_only)
 
 
 def cmd_version():
@@ -420,7 +422,7 @@ def cmd_install_or_update(
     # but it could go here
 
 
-def cmd_snapshot(config, localnames=None):
+def cmd_export(config, localnames=None):
     elements = select_elements(config, localnames)
     source_aggregate = []
     for element in elements:

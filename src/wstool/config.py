@@ -241,14 +241,24 @@ class Config:
     def get_config_filename(self):
         return self.config_filename
 
-    def get_source(self):
+    def get_source(self, versioned=False, vcs_only=False):
         """
+        :param versioned: True returns sources as versioned PathSpec, False
+        returns sources as simple PathSpec
+        :param vcs_only: True returns only version-controlled sources, False
+        returns all sources
         :returns: all elements that got added by user keystrokes
         (CLI and changed .rosinstall)
         """
         source_aggregate = []
         for tree_el in self.trees:
-            source_aggregate.append(tree_el.get_path_spec())
+            if vcs_only and not tree_el.is_vcs_element():
+                continue
+
+            if not versioned or not tree_el.is_vcs_element():
+                source_aggregate.append(tree_el.get_path_spec())
+            else:
+                source_aggregate.append(tree_el.get_versioned_path_spec())
         return source_aggregate
 
     def get_config_elements(self):

@@ -117,6 +117,13 @@ def _nth_line_split(n, output):
     else:
         return []
 
+
+def get_git_hash(git_path):
+    po = subprocess.Popen(["git", "rev-parse", "HEAD"], cwd=git_path,
+                          stdout=subprocess.PIPE)
+    return po.stdout.read().decode('UTF-8').rstrip('"\n').lstrip('"\n')
+
+
 # ROSINSTALL_CMD = os.path.join(os.getcwd(), 'scripts/rosinstall')
 # ROSWS_CMD = os.path.join(os.getcwd(), 'scripts/rosws')
 

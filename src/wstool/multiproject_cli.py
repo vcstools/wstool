@@ -59,7 +59,7 @@ __MULTIPRO_CMD_DICT__ = {
     "set":      "add or changes one entry from your workspace config",
     "update":   "update or check out some of your config elements",
     "remove":   "remove an entry from your workspace config, without deleting files",
-    "snapshot": "write a file specifying repositories to have the version they currently have",
+    "export":   "export a snapshot of the workspace",
     "diff":     "print a diff over some SCM controlled entries",
     "foreach":  "run shell command in given entries",
     "status":   "print the change status of files in some SCM controlled entries",
@@ -70,7 +70,7 @@ __MULTIPRO_CMD_DICT__ = {
 __MULTIPRO_CMD_HELP_LIST__ = ['help', 'init',
                               None, 'set', 'merge', 'remove', 'scrape',
                               None, 'update',
-                              None, 'info', 'status', 'diff', 'foreach']
+                              None, 'info', 'export', 'status', 'diff', 'foreach']
 
 # command aliases
 __MULTIPRO_CMD_ALIASES__ = {'update': 'up',
@@ -465,7 +465,8 @@ $ %(prog)s init ~/fuerte /opt/ros/fuerte
 
         # includes ROS specific files
 
-        print("Writing %s" % os.path.join(config.get_base_path(), self.config_filename))
+        if self.config_filename:
+            print("Writing %s" % os.path.join(config.get_base_path(), self.config_filename))
         self.config_generator(config, self.config_filename, get_header(self.progname))
 
         ## install or update each element
@@ -1110,6 +1111,60 @@ The command removes entries from your configuration file, it does not affect you
 
         return 0
 
+    def cmd_export(self, target_path, argv, config=None):
+        parser = OptionParser(
+            usage="usage: %s info [localname]* [OPTIONS]" % self.progname,
+            formatter=IndentedHelpFormatterWithNL(),
+            description=__MULTIPRO_CMD_DICT__["export"] + """
+Exports the current workspace.
+
+The --exact option will cause the output to contain the exact commit uuid for
+each version-controlled entry. The --spec option tells wstool to look at the
+workspace .rosinstall for versioning info instead of the workspace.
+
+Examples:
+$ %(prog)s export
+$ %(prog)s export -t ~/ros/fuerte
+$ %(prog)s export --exact
+""" % {'prog': self.progname, 'opts': ONLY_OPTION_VALID_ATTRS},
+            epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
+        parser.add_option(
+            "-o", "--output", dest="output_filename", default=None,
+            help="Write the .rosinstall export to the specified file",
+            action="store")
+        parser.add_option(
+            "-t", "--target-workspace", dest="workspace", default=None,
+            help="which workspace to use",
+            action="store")
+        parser.add_option(
+            "--exact", dest="exact", default=False, action="store_true",
+            help="export exact commit hashes instead of branch names")
+        parser.add_option(
+            "--spec", dest="spec", default=False, action="store_true",
+            help="export version from workspace spec instead of current")
+
+        (options, _) = parser.parse_args(argv)
+
+        if config is None:
+            config = multiproject_cmd.get_config(
+                target_path,
+                additional_uris=[],
+                config_filename=self.config_filename)
+        elif config.get_base_path() != target_path:
+            raise MultiProjectException("Config path does not match %s %s " %
+                                        (config.get_base_path(), target_path))
+
+        # TODO: Check for workspace differences and issue warnings?
+
+        fname = options.output_filename
+        if fname:
+            fname = os.path.abspath(fname)
+            print("Writing %s" % fname)
+        self.config_generator(config, fname, get_header(self.progname),
+                              spec=options.spec, exact=options.exact,
+                              vcs_only=True)
+
+        return 0
 
     def cmd_info(self, target_path, argv, reverse=True, config=None):
         parser = OptionParser(
@@ -1211,7 +1266,9 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
             print('\n'.join(lines))
             return 0
         elif options.yaml:
-            source_aggregate = multiproject_cmd.cmd_snapshot(config,
+            # TODO: Not sure what this does, used to be cmd_snapshot,
+            # but that command was not implemented.
+            source_aggregate = multiproject_cmd.cmd_export(config,
                                                              localnames=args)
             print(yaml.safe_dump(source_aggregate), end='')
             return 0
