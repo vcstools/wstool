@@ -247,7 +247,7 @@ columns meanings are as the respective SCM defines them.
 
   Options:
     -h, --help            show this help message and exit
-    --untracked           Also shows untracked files
+    -u, --untracked           Also shows untracked files
     -t WORKSPACE, --target-workspace=WORKSPACE
                           which workspace to use
 
@@ -262,6 +262,5 @@ print a diff over some SCM controlled entries
 
   Options:
     -h, --help            show this help message and exit
-    --untracked           Also shows untracked files
     -t WORKSPACE, --target-workspace=WORKSPACE
                         which workspace to use

@@ -755,7 +755,7 @@ $ %(progname)s foreach --git 'git status'
                               description=__MULTIPRO_CMD_DICT__["status"] +
                               ". The status columns meanings are as the respective SCM defines them.",
                               epilog="""See: http://www.ros.org/wiki/rosinstall for details""")
-        parser.add_option("--untracked", dest="untracked",
+        parser.add_option("-u", "--untracked", dest="untracked",
                           default=False,
                           help="Also shows untracked files",
                           action="store_true")

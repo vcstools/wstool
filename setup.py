@@ -56,10 +56,10 @@ def get_data_files(prefix):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--prefix', default='',
+parser.add_argument('--prefix', default=None,
                     help='prefix to install data files')
 opts, _ = parser.parse_known_args(sys.argv)
-prefix = opts.prefix
+prefix = opts.prefix or sys.prefix
 
 data_files = get_data_files(prefix)
 
