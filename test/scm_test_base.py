@@ -133,6 +133,10 @@ class AbstractRosinstallCLITest(unittest.TestCase):
     """Base class for cli tests"""
     @classmethod
     def setUpClass(self):
+        os.environ['GIT_AUTHOR_NAME'] = 'Your Name'
+        os.environ['GIT_COMMITTER_NAME'] = 'Your Name'
+        os.environ['GIT_AUTHOR_EMAIL'] = 'name@example.com'
+        os.environ['EMAIL'] = 'Your Name <name@example.com>'
         self.new_environ = copy.copy(os.environ)
         self.new_environ["PYTHONPATH"] = os.path.join(os.getcwd(), "src")
         if "ROS_WORKSPACE" in self.new_environ:

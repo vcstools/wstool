@@ -1,28 +1,19 @@
 language: python
 python:
-  - "2.6"
   - "2.7"
-  - "3.2"
-  - "3.3"
   - "3.4"
+  - "3.5"
 # command to install dependencies
 install:
-# develop seems to be required by travis since 02/2013
-  - python setup.py build develop
+  - python setup.py install
   - sudo apt-get clean
-  - sudo apt-get install -qq zsh
-  - sudo pip install vcstools nose-cov coverage pyyaml coveralls
-# Set git config to silence some stuff in the tests
-  - git config --global user.email "foo@example.com"
-  - git config --global user.name "Foo Bar"
-# Set the hg user
-  - echo -e "[ui]\nusername = Your Name <your@mail.com>" >> ~/.hgrc
-# Set the bzr user
-  - bzr whoami "Your Name <name@example.com>"
+  - sudo apt-get update && sudo apt-get install -qq zsh
+  - python -m pip install vcstools nose coverage pyyaml coveralls
 # command to run tests
 script:
   - python -c 'import sys; print(sys.path)'
-  - nosetests --with-coverage --cover-package=wstool
+  - python -c 'import coverage'
+  - python -m nose --with-coverage --cover-package=wstool test/local
 notifications:
   email: false
 after_success:
