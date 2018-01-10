@@ -99,13 +99,8 @@ if HAVE_SPHINX:
 else:
     cmdclass = {}
 
-
-install_requires = ['vcstools>=0.1.38', 'pyyaml']
-try:
-    from collections import OrderedDict
-except ImportError:
-    install_requires.append('ordereddict')  # for python<=2.6
-
+with open('requirements.txt') as requirements:
+    install_requires = requirements.read().splitlines()
 
 setup(name='wstool',
       version=get_version(),

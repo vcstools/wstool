@@ -3,14 +3,14 @@ python:
   - "2.7"
   - "3.4"
   - "3.5"
-# command to install dependencies
-install:
-  - python setup.py install
-  - sudo apt-get clean
-  - sudo apt-get update && sudo apt-get install -qq zsh
-  - python -m pip install vcstools nose coverage pyyaml coveralls
+
+# Add test requirements; travis will do the rest
+before_install:
+  - cat requirements-test.txt >> requirements.txt
+
 # command to run tests
 script:
+  - python setup.py install
   - python -c 'import sys; print(sys.path)'
   - python -c 'import coverage'
   - python -m nose --with-coverage --cover-package=wstool test/local
