@@ -337,7 +337,8 @@ def cmd_install_or_update(
     localnames=None,
     num_threads=1,
     timeout=None,
-    verbose=False):
+    verbose=False,
+    shallow=False):
     """
     performs many things, generally attempting to make
     the local filesystem look like what the config specifies,
@@ -397,7 +398,8 @@ def cmd_install_or_update(
                                  backup_path=self.report.backup_path,
                                  inplace=self.report.inplace,
                                  timeout=self.report.timeout,
-                                 verbose=self.report.verbose)
+                                 verbose=self.report.verbose,
+                                 shallow=self.report.shallow)
             return {}
 
     work = DistributedWork(capacity=len(preparation_reports),
@@ -406,6 +408,7 @@ def cmd_install_or_update(
     for report in preparation_reports:
         report.verbose = verbose
         report.timeout = timeout
+        report.shallow = shallow
         thread = Installer(report)
         work.add_thread(thread)
 

@@ -426,6 +426,9 @@ $ %(prog)s init ~/fuerte /opt/ros/fuerte
         parser.add_option("-j", "--parallel", dest="jobs", default=1,
                           help="How many parallel threads to use for installing",
                           action="store")
+        parser.add_option("--shallow", dest="shallow", default=False,
+                          help="Checkout only latest revision if possible",
+                          action="store_true")
         (options, args) = parser.parse_args(argv)
         if len(args) < 1:
             target_path = '.'
@@ -473,6 +476,7 @@ $ %(prog)s init ~/fuerte /opt/ros/fuerte
         install_success = multiproject_cmd.cmd_install_or_update(
             config,
             robust=False,
+            shallow=options.shallow,
             num_threads=int(options.jobs))
 
         if not install_success:

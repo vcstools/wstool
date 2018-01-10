@@ -85,7 +85,7 @@ class MockVcsClient():
     def path_exists(self):
         return self.path_exists_flag
 
-    def checkout(self, uri=None, version=None, verbose=False, timeout=None):
+    def checkout(self, uri=None, version=None, verbose=False, timeout=None, shallow=False):
         self.checkedout = True
         return self.checkout_success
 

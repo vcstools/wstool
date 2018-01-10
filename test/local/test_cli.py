@@ -254,7 +254,7 @@ class MockVcsConfigElement(wstool.config_elements.VCSConfigElement):
         self.properties = properties
 
     def install(self, checkout=True, backup=False, backup_path=None,
-                robust=False, verbose=False, inplace=False, timeout=None):
+                robust=False, verbose=False, inplace=False, timeout=None, shallow=False):
         if not self.install_success:
             raise MultiProjectException("Unittest Mock says install failed")
 

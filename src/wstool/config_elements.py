@@ -104,7 +104,7 @@ class ConfigElement(object):
         return preparation_report
 
     def install(self, checkout=True, backup=False, backup_path=None,
-                inplace=False, verbose=False, timeout=None):
+                inplace=False, verbose=False, timeout=None, shallow=False):
         """
         Attempt to make it so that self.path is the result of checking
         out / updating from remote repo.
@@ -175,7 +175,8 @@ class OtherConfigElement(ConfigElement):
         self.uri = uri
         self.version = version
 
-    def install(self, checkout=True, backup=False, backup_path=None, inplace=False, verbose=False):
+    def install(self, checkout=True, backup=False, backup_path=None,
+                inplace=False, verbose=False, shallow=False):
         return True
 
     def get_versioned_path_spec(self):
@@ -207,7 +208,8 @@ class SetupConfigElement(ConfigElement):
     configuration data for a config.
     """
 
-    def install(self, checkout=True, backup=False, backup_path=None, inplace=False, verbose=False):
+    def install(self, checkout=True, backup=False, backup_path=None,
+                inplace=False, verbose=False, shallow=False):
         return True
 
     def get_versioned_path_spec(self):
@@ -340,7 +342,8 @@ class VCSConfigElement(ConfigElement):
                 backup_path=None,
                 inplace=False,
                 timeout=None,
-                verbose=False):
+                verbose=False,
+                shallow=False):
         """
         Runs the equivalent of SCM checkout for new local repos or
         update for existing.
@@ -372,7 +375,8 @@ class VCSConfigElement(ConfigElement):
             if not self._get_vcsc().checkout(self.uri,
                                              self.version,
                                              timeout=timeout,
-                                             verbose=verbose):
+                                             verbose=verbose,
+                                             shallow=shallow):
                 raise MultiProjectException(
                     "[%s] Checkout of %s version %s into %s failed." % (
                         self.get_local_name(),
