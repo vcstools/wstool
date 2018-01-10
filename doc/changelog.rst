@@ -1,3 +1,8 @@
+0.1.15
+------
+
+- Fixed an issue with the conditional dependency on ``ordereddict`` in the ``setup.py`` file.
+
 0.1.14
 ------
 
