@@ -1,3 +1,2 @@
 vcstools>=0.1.38
 pyyaml
-ordereddict ;python_version<='2.6'
