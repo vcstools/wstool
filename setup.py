@@ -99,7 +99,7 @@ if HAVE_SPHINX:
 else:
     cmdclass = {}
 
-with open('requirements.txt') as requirements:
+with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as requirements:
     install_requires = requirements.read().splitlines()
 
 setup(name='wstool',
