@@ -1,3 +1,8 @@
+0.1.16
+------
+
+- Fixed some issues with new ``requirements.txt`` usage during the release process.
+
 0.1.15
 ------
 
