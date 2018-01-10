@@ -1,3 +1,12 @@
+0.1.14
+------
+
+- Fixed an issue which caused a traceback with invalid command line options.
+- Added a feature to "snapshot" the current commit hashes in the workspace as a rosinstall file.
+- Fixed option handling and documentation of the ``--untracked`` option.
+- Added ``--shallow`` option to ``wstool init`` for shallow checkouts with git.
+- Contributors: @cbandera, @rsinnet, @amiller27, @jayvdb, @at-wat
+
 0.1.13
 ------
 
