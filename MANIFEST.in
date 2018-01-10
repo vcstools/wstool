@@ -1,2 +1,3 @@
 recursive-include completion *
 recursive-include doc *
+include requirements.txt
