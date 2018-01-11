@@ -1,3 +1,8 @@
+0.1.17
+------
+
+- Reverted the snapshot command since it was breaking ``rosws`` until it can be fixed.
+
 0.1.16
 ------
 
