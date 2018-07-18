@@ -14,6 +14,10 @@ script:
   - python -c 'import sys; print(sys.path)'
   - python -c 'import coverage'
   - python -m nose --with-coverage --cover-package=wstool test/local
+
+  # Install rosinstall from pip and perform a sanity check
+  - pip install --upgrade rosinstall
+  - rosws
 notifications:
   email: false
 after_success:

@@ -34,13 +34,14 @@ import os
 import unittest
 import tempfile
 import shutil
+import subprocess
 
 import wstool.config_yaml
 import wstool.config
 from wstool.common import MultiProjectException
 from wstool.config_yaml import rewrite_included_source, \
     get_path_spec_from_yaml, get_yaml_from_uri, get_path_specs_from_uri, \
-    PathSpec, aggregate_from_uris
+    PathSpec, aggregate_from_uris, __REPOTYPES__
 
 _test_root = os.path.dirname(os.path.dirname(__file__))
 
@@ -167,75 +168,129 @@ class UriAggregationTest(unittest.TestCase):
 
 class ConfigFile_Test(unittest.TestCase):
 
-    def test_generate(self):
-        self.directory = tempfile.mkdtemp()
-        config = wstool.config.Config([], self.directory)
-        wstool.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n")
-        filepath = os.path.join(self.directory, 'foo')
+    def make_repo_get_uuid(self):
+        repo_path = os.path.join(self.directory, self.git)
+        subprocess.check_call(['git', 'init', self.git], cwd=self.directory)
+        subprocess.check_call(['touch', 'test.txt'], cwd=repo_path)
+        subprocess.check_call(['git', 'add', '*'], cwd=repo_path)
+        subprocess.check_call(['git', 'commit', '-m', 'msg'], cwd=repo_path)
+        subprocess.check_call(['git', 'remote', 'add', 'origin', self.uri],
+                              cwd=repo_path)
+        po = subprocess.Popen(['git', 'rev-parse', 'HEAD'], cwd=repo_path,
+                              stdout=subprocess.PIPE)
+        uuid = po.stdout.read().decode('UTF-8').rstrip('"\n').lstrip('"\n')
+        return uuid
+
+    def helper(self, check_config_entries, args, entries):
+        assert check_config_entries.__class__.__name__ == 'function'
+
+        header = '# Hello'
+        filename = 'foo'
+        uuid = self.make_repo_get_uuid()
+
+        for entry in entries:
+            self.assertTrue(isinstance(entry, PathSpec))
+            if entry._scmtype:
+                self.assertTrue(entry._scmtype in __REPOTYPES__)
+
+        config = wstool.config.Config(entries, self.directory)
+        wstool.config_yaml.generate_config_yaml(config, filename,
+                                                header + '\n', **args)
+        filepath = os.path.join(self.directory, filename)
         self.assertTrue(os.path.exists(filepath))
         with open(filepath, 'r') as f:
             read_data = f.read()
         lines = read_data.splitlines()
-        self.assertEqual(1, len(lines), lines)
-        self.assertEqual("# Hello", lines[0])
+        self.assertTrue(len(lines) > 0)
+        self.assertEqual(header, lines[0])
+        check_config_entries(self, lines[1:], uuid)
+
+    def test_generate_empty(self):
+        def check_config_entries(self, lines, uuid):
+            self.assertEqual(0, len(lines))
+        self.helper(check_config_entries, {}, [])
+
+    def test_generate_with_version(self):
+        def check_config_entries(self, lines, uuid):
+            self.assertEqual(2, len(lines))
+            self.assertEqual(self.git_el % self.version, lines[0])
+            self.assertEqual(self.other_el, lines[1])
+        self.helper(check_config_entries, {},
+                    [PathSpec(self.git, 'git', self.uri, self.version),
+                     PathSpec(self.other)])
+
+    def test_generate_with_exact(self):
+        def check_config_entries(self, lines, uuid):
+            self.assertEqual(2, len(lines))
+            self.assertEqual(self.git_el % uuid, lines[0])
+            self.assertEqual(self.other_el, lines[1])
+        self.helper(check_config_entries, {'spec': False, 'exact': True},
+                    [PathSpec(self.git, 'git', self.uri, self.version),
+                     PathSpec(self.other)])
+
+    def test_generate_with_vcs_only(self):
+        def check_config_entries(self, lines, uuid):
+            self.assertEqual(1, len(lines))
+            self.assertEqual(self.git_el % self.version, lines[0])
+        self.helper(check_config_entries, {'vcs_only': True},
+                    [PathSpec(self.git, 'git', self.uri, self.version),
+                     PathSpec(self.other)])
+
+    def test_generate_with_spec_exact(self):
+        def check_config_entries(self, lines, uuid):
+            self.assertEqual(1, len(lines))
+            self.assertEqual(self.git_el % uuid, lines[0])
+        self.helper(check_config_entries,
+                    {'spec': True, 'exact': 'True', 'vcs_only': True},
+                    [PathSpec(self.git, 'git', self.uri, self.version),
+                     PathSpec(self.other)])
 
     def test_generate_with_other(self):
-        self.directory = tempfile.mkdtemp()
-        config = wstool.config.Config([PathSpec('ros')], self.directory)
-        wstool.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n")
-        filepath = os.path.join(self.directory, 'foo')
-        self.assertTrue(os.path.exists(filepath))
-        with open(filepath, 'r') as f:
-            read_data = f.read()
-        lines = read_data.splitlines()
-        self.assertEqual("# Hello", lines[0])
-        self.assertEqual("- other: {local-name: ros}", lines[1])
+        def check_config_entries(self, lines, uuid):
+            self.assertEqual(1, len(lines))
+            self.assertEqual(self.other_el, lines[0])
+        self.helper(check_config_entries, {}, [PathSpec(self.other)])
 
     def test_generate_with_stack(self):
-        self.directory = tempfile.mkdtemp()
-        config = wstool.config.Config([PathSpec('ros', 'svn', 'some/uri')], self.directory)
-        wstool.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n")
-        filepath = os.path.join(self.directory, 'foo')
-        self.assertTrue(os.path.exists(filepath))
-        with open(filepath, 'r') as f:
-            read_data = f.read()
-        lines = read_data.splitlines()
-        self.assertEqual("# Hello", lines[0])
-        self.assertEqual("- svn: {local-name: ros, uri: %s/some/uri}" % self.directory, lines[1])
+        def check_config_entries(self, lines, uuid):
+            self.assertEqual(1, len(lines))
+            self.assertEqual("- svn: {local-name: ros, uri: %s/some/uri}"
+                             % self.directory, lines[0])
+        self.helper(check_config_entries, {},
+                    [PathSpec('ros', 'svn', 'some/uri')])
 
     def test_generate_with_pretty_format(self):
-        self.directory = tempfile.mkdtemp()
-        config = wstool.config.Config([PathSpec('ros', 'svn', 'some/uri')],
-                                      self.directory)
-        wstool.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n",
-                                                pretty=True)
-        filepath = os.path.join(self.directory, 'foo')
-        self.assertTrue(os.path.exists(filepath))
-        with open(filepath, 'r') as f:
-            read_data = f.read()
-        self.assertEqual("""\
-# Hello
-- svn:
-    local-name: ros
-    uri: %s/some/uri
-""" % self.directory, read_data)
+        def check_config_entries(self, lines, uuid):
+            self.assertEqual(3, len(lines))
+            self.assertEqual('''\
+- git:
+    local-name: %s
+    uri: %s\
+''' % (self.git, self.uri), '\n'.join(lines))
+        self.helper(check_config_entries, {'pretty': True},
+                    [PathSpec(self.git, 'git', self.uri)])
 
     def test_generate_sorted_with_localname(self):
-        self.directory = tempfile.mkdtemp()
-        elements = [PathSpec('ros', 'svn', 'some/uri1'),
-                    PathSpec('git', 'git', 'some/uri2')]
-        config = wstool.config.Config(elements, self.directory)
-        wstool.config_yaml.generate_config_yaml(config, 'foo', "# Hello\n",
-                                                sort_with_localname=True)
-        filepath = os.path.join(self.directory, 'foo')
-        self.assertTrue(os.path.exists(filepath))
-        with open(filepath, 'r') as f:
-            read_data = f.read()
-        self.assertEqual("""\
-# Hello
+        def check_config_entries(self, lines, uuid):
+            self.assertEqual(2, len(lines))
+            self.assertEqual('''\
 - git: {local-name: git, uri: %s/some/uri2}
-- svn: {local-name: ros, uri: %s/some/uri1}
-""" % (self.directory, self.directory), read_data)
+- svn: {local-name: ros, uri: %s/some/uri1}\
+''' % (self.directory, self.directory), "\n".join(lines[:2]))
+
+        self.helper(check_config_entries, {'sort_with_localname': True},
+                    [PathSpec('ros', 'svn', 'some/uri1'),
+                     PathSpec('git', 'git', 'some/uri2')])
+
+    def setUp(self):
+        self.uri = 'http://some/uri'
+        self.version = 'master'
+        self.git = 'ros'
+        self.git_el = '- git: {{local-name: {0}, uri: \'{1}\', version: %s}}' \
+            .format(self.git, self.uri)
+        self.other = 'foobar'
+        self.other_el = '- other: {local-name: %s}' % self.other
+        self.directory = tempfile.mkdtemp()
 
     def tearDown(self):
         if os.path.exists(self.directory):
