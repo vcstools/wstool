@@ -63,7 +63,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--prefix', default=None,
                     help='prefix to install data files')
 opts, _ = parser.parse_known_args(sys.argv)
-prefix = opts.prefix or sys.prefix
+prefix = sys.prefix if opts.prefix == None else opts.prefix
 
 data_files = get_data_files(prefix)
 
