@@ -34,7 +34,7 @@ class RosinstallTarTest(AbstractFakeRosBasedTest):
         self.assertTrue(os.path.isdir(os.path.join(self.directory, "temptar")))
         self.assertTrue(os.path.isfile(os.path.join(self.directory, ".rosinstall")))
         stream = open(os.path.join(self.directory, '.rosinstall'), 'r')
-        yamlsrc = yaml.load(stream)
+        yamlsrc = yaml.safe_load(stream)
         stream.close()
         self.assertEqual(1, len(yamlsrc))
         self.assertEqual('tar', list(yamlsrc[0].keys())[0])

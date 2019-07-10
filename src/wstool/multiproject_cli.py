@@ -546,7 +546,7 @@ $ roslocate info robot_model | %(prog)s merge -
         if config_uris[0] == '-':
             pipedata = "".join(sys.stdin.readlines())
             try:
-                yamldicts = yaml.load(pipedata)
+                yamldicts = yaml.safe_load(pipedata)
             except yaml.YAMLError as e:
                 raise MultiProjectException(
                     "Invalid yaml format: \n%s \n%s" % (pipedata, e))
