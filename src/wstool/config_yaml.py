@@ -446,7 +446,7 @@ def generate_config_yaml(config, filename, header, pretty=False,
             content += yaml.safe_dump(items, allow_unicode=True,
                                       default_flow_style=False)
         else:
-            content += yaml.safe_dump(items)
+            content += yaml.safe_dump(items, default_flow_style=None)
 
     if filename:
         config_filepath = filename if os.path.isabs(filename) else \

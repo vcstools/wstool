@@ -1274,7 +1274,7 @@ $ %(prog)s info --only=path,cur_uri,cur_revision robot_model geometry
             # but that command was not implemented.
             source_aggregate = multiproject_cmd.cmd_snapshot(config,
                                                              localnames=args)
-            print(yaml.safe_dump(source_aggregate), end='')
+            print(yaml.safe_dump(source_aggregate, default_flow_style=None), end='')
             return 0
 
         # this call takes long, as it invokes scms.
