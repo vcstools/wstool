@@ -1,23 +1,30 @@
 language: python
 python:
   - "2.7"
-  - "3.4"
   - "3.5"
+  - "3.6"
 
 # Add test requirements; travis will do the rest
 before_install:
   - cat requirements-test.txt >> requirements.txt
 
+install:
+  - sudo apt-get update
+  - pip install -U setuptools tox tox-travis
+  - echo $PYTHONPATH
+  - python -c 'import sys; print(sys.path)'
+  - python setup.py install
+  - python -c 'import coverage'
+
 # command to run tests
 script:
-  - python setup.py install
-  - python -c 'import sys; print(sys.path)'
-  - python -c 'import coverage'
-  - python -m nose --with-coverage --cover-package=wstool test/local
+  - tox
 
   # Install rosinstall from pip and perform a sanity check
-  - pip install --upgrade rosinstall
+  - pip install --upgrade rosinstall wstool
   - rosws
+  - wstool --help
+
 notifications:
   email: false
 after_success:

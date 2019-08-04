@@ -8,6 +8,10 @@ import imp
 import argparse
 
 
+with open('README.rst') as readme_file:
+    README = readme_file.read()
+
+
 def get_version():
     ver_file = None
     try:
@@ -102,6 +106,9 @@ else:
 with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as requirements:
     install_requires = requirements.read().splitlines()
 
+with open(os.path.join(os.path.dirname(__file__), 'requirements-test.txt')) as requirements:
+    test_required = requirements.read().splitlines()
+
 setup(name='wstool',
       version=get_version(),
       packages=['wstool'],
@@ -110,6 +117,12 @@ setup(name='wstool',
       cmdclass=cmdclass,
       # rosinstall dependency to be kept in order not to break ros hydro install instructions
       install_requires=install_requires,
+      # extras_require allow pip install .[test]
+      extras_require={
+        'test': test_required
+      },
+      # tests_require automatically installed when running python setup.py test
+      tests_require=test_required,
       scripts=["scripts/wstool"],
       author="Tully Foote",
       author_email="tfoote@osrfoundation.org",
@@ -118,9 +131,10 @@ setup(name='wstool',
       classifiers=["Programming Language :: Python",
                    "Programming Language :: Python :: 2",
                    "Programming Language :: Python :: 3",
-                   "License :: OSI Approved :: BSD License"],
+                   "Development Status :: 7 - Inactive",
+                   "License :: OSI Approved :: BSD License",
+                   "Topic :: Software Development :: Version Control"
+      ],
       description="workspace multi-SCM commands",
-      long_description="""\
-A tool for managing a workspace of multiple heterogenous SCM repositories
-""",
+      long_description=README,
       license="BSD")
