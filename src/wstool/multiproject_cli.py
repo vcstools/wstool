@@ -1080,6 +1080,11 @@ $ %(progname)s update robot_model geometry
 The command removes entries from your configuration file, it does not affect your filesystem.
 """,
                               epilog="See: http://www.ros.org/wiki/rosinstall for details\n")
+        # -t option required here for help but used one layer above, see cli_common
+        parser.add_option(
+            "-t", "--target-workspace", dest="workspace", default=None,
+            help="which workspace to use",
+            action="store")
         (_, args) = parser.parse_args(argv)
         if len(args) < 1:
             print("Error: Too few arguments.")
