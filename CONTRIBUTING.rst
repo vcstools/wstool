@@ -51,3 +51,30 @@ Then you can use different commands to run various test scopes::
   $ python3 setup.py test
   # run all tests against multiple python versions (same as in travis)
   $ tox
+
+Releasing
+---------
+
+* Upgrade vcstools dependency version in `requirements.txt`
+* Update `src/vcstools/__version__.py`
+* Check `doc/changelog` is up to date
+* Check `stdeb.cfg` is up to date with OSRF buildfarm distros
+* prepare release dependencies::
+
+      pip install --upgrade setuptools wheel twine
+
+* Upload to testpypi::
+
+      python3 setup.py sdist bdist_wheel
+      twine upload --repository testpypi dist/*
+
+* Check testpypi download files and documentation look ok
+* Actually release::
+
+      twine upload dist/*
+
+* Create and push tag::
+
+      git tag x.y.z
+      git push
+      git push --tags

@@ -1,3 +1,20 @@
+Changelog
+=========
+
+0.1.18
+------
+
+- fix warnings by replacing yaml.load() with safe_load()
+- Re-add snapshot command called 'export' (#117, #120)
+- fix '-t' option not working for wstool remove
+- upgrade vcstools library version to 0.1.41, with new fixes:
+
+  - fix git submodule errors
+  - fix export_upstream for git submodules
+  - fix python3 incompatibility
+  - fix git fast-forward failures
+  - fix get_affected_files
+
 0.1.17
 ------
 

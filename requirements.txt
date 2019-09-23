@@ -1,2 +1,2 @@
-vcstools>=0.1.38
+vcstools>=0.1.42
 pyyaml
