@@ -67,6 +67,8 @@ Releasing
 
       python3 setup.py sdist bdist_wheel
       twine upload --repository testpypi dist/*
+      # in fresh virtualenv
+      pip install -i https://test.pypi.org/simple/ wstool
 
 * Check testpypi download files and documentation look ok
 * Actually release::
