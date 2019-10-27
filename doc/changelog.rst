@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.1.19
+------
+
+maintenance release, no change to distributable
+
+- add to documentation, CI setup, remove comments from requirements.txt
+
 0.1.18
 ------
 
