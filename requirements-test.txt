@@ -1,7 +1,6 @@
 nose
 mock
 pep8
-# run checks in multiple environments
 tox
 tox-pyenv
 
