@@ -1,3 +1,8 @@
+Archived
+========
+This repository has been archived due to a lack of maintainance and no longer being used in the ROS project.
+For similar functionality see http://wiki.ros.org/vcstool.
+
 wstool
 ==========
 
